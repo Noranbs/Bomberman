@@ -1,0 +1,26 @@
+# Build directories
+cmake-build-*/
+build/
+out/
+
+# CLion / JetBrains
+.idea/
+
+# Runtime files
+scores.txt
+
+# Compiled binaries and objects
+*.o
+*.a
+*.so
+*.dll
+*.dylib
+*.exe
+
+# CMake generated files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+CTestTestfile.cmake
+Testing/
