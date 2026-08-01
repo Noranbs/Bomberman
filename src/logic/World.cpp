@@ -633,6 +633,8 @@ void World::moveEnemyTowardTarget(Character& enemy, EnemyAiState& ai, float delt
                     ai.hasTarget = false;
                 } else {
                     ai.input = {};
+                    ai.escapingOwnBomb = false;
+                    ai.decisionTimer = 0.0F;
                 }
             } else {
                 ai.input = {};
@@ -662,11 +664,16 @@ void World::moveEnemyTowardTarget(Character& enemy, EnemyAiState& ai, float delt
             if (!canEnterTile(enemy, nextRow, nextCol) ||
                 (!isTileThreatenedByBomb(currentRow, currentCol, ai.escapeBombRow, ai.escapeBombCol, ai.escapeBombRadius) &&
                  !isTileThreatenedByBomb(nextRow, nextCol, ai.escapeBombRow, ai.escapeBombCol, ai.escapeBombRadius))) {
-                ai.input = findEscapeInput(enemy,
-                                           ai.escapeBombRow,
-                                           ai.escapeBombCol,
-                                           ai.escapeBombRadius)
-                               .value_or(ai.input);
+                if (const auto reroute = findEscapeInput(enemy,
+                                                         ai.escapeBombRow,
+                                                         ai.escapeBombCol,
+                                                         ai.escapeBombRadius);
+                    reroute.has_value()) {
+                    ai.input = *reroute;
+                } else {
+                    ai.escapingOwnBomb = false;
+                    ai.decisionTimer = 0.0F;
+                }
             }
         }
         return;
