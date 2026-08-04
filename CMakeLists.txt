@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 project(Bomberman_AP VERSION 0.1.0 LANGUAGES CXX)
 
+set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/installed" CACHE PATH "Install path prefix" FORCE)
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -40,3 +42,12 @@ add_custom_command(TARGET Bomberman_AP POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${PROJECT_SOURCE_DIR}/assets
         $<TARGET_FILE_DIR:Bomberman_AP>/assets)
+
+install(TARGETS Bomberman_AP DESTINATION bin)
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/assets DESTINATION .)
+
+find_package(Doxygen)
+if(DOXYGEN_FOUND)
+    set(DOXYGEN_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/doc)
+    doxygen_add_docs(doc ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/src)
+endif()
