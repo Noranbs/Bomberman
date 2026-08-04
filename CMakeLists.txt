@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 3.16)
 project(Bomberman_AP VERSION 0.1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -18,7 +18,7 @@ target_include_directories(bomberman_logic
 
 target_compile_options(bomberman_logic PRIVATE -Wall -Wextra -Wpedantic)
 
-find_package(SFML 2.6 COMPONENTS graphics window system REQUIRED)
+find_package(SFML 2.5 COMPONENTS graphics window system REQUIRED)
 
 add_executable(Bomberman_AP
         src/sfml/Game.cpp
