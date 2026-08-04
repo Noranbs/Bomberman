@@ -18,7 +18,7 @@ target_include_directories(bomberman_logic
 
 target_compile_options(bomberman_logic PRIVATE -Wall -Wextra -Wpedantic)
 
-find_package(SFML 2.6 COMPONENTS graphics window system REQUIRED)
+find_package(SFML 2.5 COMPONENTS graphics window system REQUIRED)
 
 add_executable(Bomberman_AP
         src/sfml/Game.cpp
