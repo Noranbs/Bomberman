@@ -7,10 +7,15 @@ jobs:
       - image: ubuntu:20.04
     steps:
       - checkout
-      - run: apt-get update
-      - run: DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common
-      - run: add-apt-repository universe && apt-get update
-      - run: DEBIAN_FRONTEND=noninteractive TZ=Europe/Brussels apt-get install -y gcc g++ cmake git doxygen libsfml-dev
+      - run:
+          name: Install dependencies
+          command: |
+            for i in 1 2 3; do
+              apt-get update && \
+              DEBIAN_FRONTEND=noninteractive TZ=Europe/Brussels apt-get install -y gcc g++ cmake git doxygen && break
+              echo "Attempt $i failed, retrying in 15s..."
+              sleep 15
+            done
       - run: mkdir -p build
       - run: cd build && cmake ..
       - run: cd build && make
