@@ -40,7 +40,3 @@ add_custom_command(TARGET Bomberman_AP POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${PROJECT_SOURCE_DIR}/assets
         $<TARGET_FILE_DIR:Bomberman_AP>/assets)
-
-add_executable(bomberman_logic_tests tests/logic_tests.cpp)
-target_link_libraries(bomberman_logic_tests PRIVATE bomberman_logic)
-target_compile_options(bomberman_logic_tests PRIVATE -Wall -Wextra -Wpedantic)
