@@ -30,8 +30,9 @@ struct Rect {
 
     [[nodiscard]] constexpr bool intersects(const Rect& other) const
     {
-        return left() < other.right() && right() > other.left() && top() < other.bottom() &&
-               bottom() > other.top();
+        constexpr float epsilon = 0.0001F;
+        return left() < other.right() - epsilon && right() > other.left() + epsilon &&
+               top() < other.bottom() - epsilon && bottom() > other.top() + epsilon;
     }
 };
 
