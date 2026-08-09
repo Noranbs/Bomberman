@@ -4,6 +4,7 @@
 #include "bomberman/logic/Entity.h"
 
 #include <memory>
+#include <optional>
 
 namespace bomberman::logic {
 
@@ -22,7 +23,8 @@ public:
     virtual std::shared_ptr<Block> createBlock(std::size_t id,
                                                EntityType type,
                                                Vec2 position,
-                                               Vec2 size) = 0;
+                                               Vec2 size,
+                                               std::optional<ExplosionShape> explosionShape = std::nullopt) = 0;
 
     // Creates a new pickable power-up item instance
     virtual std::shared_ptr<PowerUp> createPowerUp(std::size_t id,

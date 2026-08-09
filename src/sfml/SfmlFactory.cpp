@@ -20,9 +20,12 @@ std::shared_ptr<logic::Character> SfmlFactory::createCharacter(std::size_t id,
 std::shared_ptr<logic::Block> SfmlFactory::createBlock(std::size_t id,
                                                        logic::EntityType type,
                                                        logic::Vec2 position,
-                                                       logic::Vec2 size)
+                                                       logic::Vec2 size,
+                                                       std::optional<logic::ExplosionShape> explosionShape)
 {
-    auto block = std::make_shared<logic::Block>(id, type, position, size);
+    auto block = explosionShape.has_value()
+                     ? std::make_shared<logic::Block>(id, type, position, size, *explosionShape)
+                     : std::make_shared<logic::Block>(id, type, position, size);
     attachView(block);
     return block;
 }

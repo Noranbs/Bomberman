@@ -24,6 +24,11 @@ std::optional<PowerUpType> Entity::powerUpType() const
     return std::nullopt;
 }
 
+std::optional<ExplosionShape> Entity::explosionShape() const
+{
+    return std::nullopt;
+}
+
 void Entity::setPosition(Vec2 position)
 {
     pos = position;
@@ -98,6 +103,16 @@ void Character::replenishBomb()
 Block::Block(std::size_t id, EntityType type, Vec2 position, Vec2 size)
     : Entity(id, type, position, size)
 {
+}
+
+Block::Block(std::size_t id, EntityType type, Vec2 position, Vec2 size, ExplosionShape explosionShape)
+    : Entity(id, type, position, size), explosionShapeKind(explosionShape)
+{
+}
+
+std::optional<ExplosionShape> Block::explosionShape() const
+{
+    return explosionShapeKind;
 }
 
 PowerUp::PowerUp(std::size_t id, Vec2 position, Vec2 size, PowerUpType powerUpType)

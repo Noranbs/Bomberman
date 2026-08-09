@@ -127,6 +127,7 @@ void SpriteView::configureSprite()
         spriteOrigin = {12.0F, 12.0F};
         sprite.setTextureRect(sf::IntRect(352, 704, 24, 24));
         fallback.setFillColor(sf::Color(255, 190, 58, 210));
+        fallback.setOutlineColor(sf::Color(255, 95, 32));
         break;
     case logic::EntityType::PowerUp:
         usesTexture = true;

@@ -34,6 +34,12 @@ enum class PowerUpType {
     Skates
 };
 
+enum class ExplosionShape {
+    Center,
+    Horizontal,
+    Vertical
+};
+
 class Entity {
 public:
     Entity(std::size_t id, EntityType type, Vec2 position, Vec2 size);
@@ -53,6 +59,7 @@ public:
 
     [[nodiscard]] virtual bool blocksMovement() const;
     [[nodiscard]] virtual std::optional<PowerUpType> powerUpType() const;
+    [[nodiscard]] virtual std::optional<ExplosionShape> explosionShape() const;
 
     void setPosition(Vec2 position);
     void killEntity();
@@ -107,6 +114,12 @@ private:
 class Block final : public Entity {
 public:
     Block(std::size_t id, EntityType type, Vec2 position, Vec2 size);
+    Block(std::size_t id, EntityType type, Vec2 position, Vec2 size, ExplosionShape explosionShape);
+
+    [[nodiscard]] std::optional<ExplosionShape> explosionShape() const override;
+
+private:
+    std::optional<ExplosionShape> explosionShapeKind{};
 };
 
 class PowerUp final : public Entity {

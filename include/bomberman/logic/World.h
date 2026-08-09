@@ -45,6 +45,7 @@ private:
         float timer{2.0F};
         int radius{1};
         bool blocksOwner{false};
+        bool exploded{false};
     };
 
     struct ExplosionState {
@@ -64,6 +65,7 @@ private:
         bool hasTarget{false};
         int targetRow{0};
         int targetCol{0};
+        std::vector<Vec2> escapePath{};
     };
 
     std::size_t nextId();
@@ -78,7 +80,13 @@ private:
     [[nodiscard]] std::optional<Vec2> findEscapeInput(const Character& character,
                                                       int bombRow,
                                                       int bombCol,
-                                                      int radius) const;
+                                                      int radius,
+                                                      int maxDistanceOverride = -1) const;
+    [[nodiscard]] std::optional<std::vector<Vec2>> findEscapePath(const Character& character,
+                                                                   int bombRow,
+                                                                   int bombCol,
+                                                                   int radius,
+                                                                   int maxDistanceOverride) const;
     [[nodiscard]] std::optional<Vec2> findStraightEscapeInput(const Character& character,
                                                               int bombRow,
                                                               int bombCol,

@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <cstdio>
 #include <queue>
 #include <stdexcept>
 #include <utility>
@@ -205,7 +206,7 @@ bool World::hasEscapeFromBomb(const Character& character, int bombRow, int bombC
     return findEscapeInput(character, bombRow, bombCol, radius).has_value();
 }
 
-std::optional<Vec2> World::findEscapeInput(const Character& character, int bombRow, int bombCol, int radius) const
+std::optional<Vec2> World::findEscapeInput(const Character& character, int bombRow, int bombCol, int radius, int maxDistanceOverride) const
 {
     static constexpr std::array<std::pair<int, int>, 4> directions{
         std::pair<int, int>{-1, 0},
@@ -221,7 +222,7 @@ std::optional<Vec2> World::findEscapeInput(const Character& character, int bombR
         Vec2 firstInput{};
     };
 
-    const int maxDistance = radius + 4;
+    const int maxDistance = maxDistanceOverride >= 0 ? maxDistanceOverride : radius + 4;
     std::vector<bool> visited(static_cast<std::size_t>(numRows * numCols), false);
     std::queue<SearchNode> queue{};
     const auto indexFor = [this](int r, int c) {
@@ -264,6 +265,77 @@ std::optional<Vec2> World::findEscapeInput(const Character& character, int bombR
 
             visited[indexFor(r, c)] = true;
             queue.push({r, c, node.distance + 1, node.firstInput});
+        }
+    }
+
+    return std::nullopt;
+}
+
+std::optional<std::vector<Vec2>> World::findEscapePath(const Character& character,
+                                                        int bombRow,
+                                                        int bombCol,
+                                                        int radius,
+                                                        int maxDistanceOverride) const
+{
+    static constexpr std::array<std::pair<int, int>, 4> directions{
+        std::pair<int, int>{-1, 0},
+        std::pair<int, int>{1, 0},
+        std::pair<int, int>{0, -1},
+        std::pair<int, int>{0, 1},
+    };
+
+    struct SearchNode {
+        int row{0};
+        int col{0};
+        int distance{0};
+        std::vector<Vec2> path{};
+    };
+
+    const int maxDistance = maxDistanceOverride >= 0 ? maxDistanceOverride : radius + 4;
+    std::vector<bool> visited(static_cast<std::size_t>(numRows * numCols), false);
+    std::queue<SearchNode> queue{};
+    const auto indexFor = [this](int r, int c) {
+        return static_cast<std::size_t>(r * numCols + c);
+    };
+    const auto [startRow, startCol] = tileForPosition(character.getPosition());
+
+    visited[indexFor(startRow, startCol)] = true;
+
+    for (const auto& [rowStep, colStep] : directions) {
+        const int r = startRow + rowStep;
+        const int c = startCol + colStep;
+        if (!canEnterTile(character, r, c) || visited[indexFor(r, c)]) {
+            continue;
+        }
+
+        visited[indexFor(r, c)] = true;
+        queue.push({r, c, 1, {directionForStep(rowStep, colStep)}});
+    }
+
+    while (!queue.empty()) {
+        SearchNode node = queue.front();
+        queue.pop();
+
+        if (!isTileDangerous(node.row, node.col) &&
+            !isTileThreatenedByBomb(node.row, node.col, bombRow, bombCol, radius)) {
+            return node.path;
+        }
+
+        if (node.distance >= maxDistance) {
+            continue;
+        }
+
+        for (const auto& [rowStep, colStep] : directions) {
+            const int r = node.row + rowStep;
+            const int c = node.col + colStep;
+            if (!isInsideArena(r, c) || visited[indexFor(r, c)] || !canEnterTile(character, r, c)) {
+                continue;
+            }
+
+            visited[indexFor(r, c)] = true;
+            auto nextPath = node.path;
+            nextPath.push_back(directionForStep(rowStep, colStep));
+            queue.push({r, c, node.distance + 1, std::move(nextPath)});
         }
     }
 
@@ -322,6 +394,7 @@ Vec2 World::directionForStep(int rowStep, int colStep) const
 
 Vec2 World::chooseEnemyInput(Character& enemy)
 {
+    static constexpr int huntRange = 8;
     const auto [row, col] = tileForPosition(enemy.getPosition());
     static constexpr std::array<std::pair<int, int>, 4> directions{
         std::pair<int, int>{-1, 0},
@@ -361,8 +434,43 @@ Vec2 World::chooseEnemyInput(Character& enemy)
         for (const auto& [rowStep, colStep] : validDirections) {
             const int nextRow = row + rowStep;
             const int nextCol = col + colStep;
+            if (!tileContains(EntityType::Bomb, nextRow, nextCol) && !isTileDangerous(nextRow, nextCol)) {
+                return directionForStep(rowStep, colStep);
+            }
+        }
+        for (const auto& [rowStep, colStep] : validDirections) {
+            const int nextRow = row + rowStep;
+            const int nextCol = col + colStep;
             if (!tileContains(EntityType::Bomb, nextRow, nextCol)) {
                 return directionForStep(rowStep, colStep);
+            }
+        }
+    }
+
+    if (playerChar != nullptr && playerChar->isAlive()) {
+        const auto [playerRow, playerCol] = tileForPosition(playerChar->getPosition());
+        const int rowDistance = playerRow - row;
+        const int colDistance = playerCol - col;
+        if (std::abs(rowDistance) + std::abs(colDistance) <= huntRange) {
+            if (std::abs(rowDistance) >= std::abs(colDistance) && rowDistance != 0) {
+                const int rowStep = rowDistance > 0 ? 1 : -1;
+                if (canEnterTile(enemy, row + rowStep, col) && !isTileDangerous(row + rowStep, col)) {
+                    return directionForStep(rowStep, 0);
+                }
+            }
+
+            if (colDistance != 0) {
+                const int colStep = colDistance > 0 ? 1 : -1;
+                if (canEnterTile(enemy, row, col + colStep) && !isTileDangerous(row, col + colStep)) {
+                    return directionForStep(0, colStep);
+                }
+            }
+
+            if (rowDistance != 0) {
+                const int rowStep = rowDistance > 0 ? 1 : -1;
+                if (canEnterTile(enemy, row + rowStep, col) && !isTileDangerous(row + rowStep, col)) {
+                    return directionForStep(rowStep, 0);
+                }
             }
         }
     }
@@ -565,6 +673,7 @@ void World::updateEnemies(float deltaTime)
         if (ai.escapingOwnBomb) {
             if (!hasBombAt(ai.escapeBombRow, ai.escapeBombCol)) {
                 ai.escapingOwnBomb = false;
+                ai.escapePath.clear();
                 ai.input = {};
                 ai.hasTarget = false;
                 ai.decisionTimer = 0.0F;
@@ -573,11 +682,27 @@ void World::updateEnemies(float deltaTime)
 
         const bool dangerous = isTileDangerous(row, col);
         const auto straightEscapeInput = findStraightEscapeInput(*enemy, row, col, enemy->getBombRadius());
+        const int bombRadiusForCheck = enemy->getBombRadius();
+
+        std::vector<Vec2> escapeSteps{};
+        if (straightEscapeInput.has_value()) {
+            escapeSteps.assign(static_cast<std::size_t>(bombRadiusForCheck + 1), *straightEscapeInput);
+        } else if (const auto path = findEscapePath(*enemy, row, col, bombRadiusForCheck, bombRadiusForCheck + 2);
+                   path.has_value()) {
+            escapeSteps = *path;
+        }
+
+        bool playerInBlastRange = false;
+        if (playerChar != nullptr && playerChar->isAlive()) {
+            const auto [playerRow, playerCol] = tileForPosition(playerChar->getPosition());
+            playerInBlastRange = isTileThreatenedByBomb(playerRow, playerCol, row, col, enemy->getBombRadius());
+        }
+
         if (!ai.escapingOwnBomb &&
             !dangerous &&
             ai.bombCooldown <= 0.0F &&
-            hasAdjacentDestructibleBlock(row, col) &&
-            straightEscapeInput.has_value()) {
+            (hasAdjacentDestructibleBlock(row, col) || playerInBlastRange) &&
+            !escapeSteps.empty()) {
             const int bombRadius = enemy->getBombRadius();
             placeBombFor(enemy);
             ai.bombCooldown = Random::instance().getRandomFloat(2.5F, 4.5F);
@@ -585,7 +710,8 @@ void World::updateEnemies(float deltaTime)
             ai.escapeBombRow = row;
             ai.escapeBombCol = col;
             ai.escapeBombRadius = bombRadius;
-            ai.input = *straightEscapeInput;
+            ai.escapePath = escapeSteps;
+            ai.input = ai.escapePath.front();
             ai.hasTarget = false;
             ai.decisionTimer = 0.15F;
         }
@@ -624,6 +750,7 @@ void World::moveEnemyTowardTarget(Character& enemy, EnemyAiState& ai, float delt
 
         if (!canEnterTile(enemy, ai.targetRow, ai.targetCol)) {
             if (ai.escapingOwnBomb) {
+                ai.escapePath.clear();
                 if (const auto escapeInput = findEscapeInput(enemy,
                                                              ai.escapeBombRow,
                                                              ai.escapeBombCol,
@@ -646,8 +773,27 @@ void World::moveEnemyTowardTarget(Character& enemy, EnemyAiState& ai, float delt
         ai.hasTarget = true;
     }
 
+    if (!ai.escapingOwnBomb && isTileDangerous(ai.targetRow, ai.targetCol)) {
+        ai.hasTarget = false;
+        ai.input = {};
+        ai.decisionTimer = 0.0F;
+        return;
+    }
+
     const Vec2 target = tileCenter(ai.targetRow, ai.targetCol);
     Vec2 position = enemy.getPosition();
+
+
+    if (ai.input.x != 0.0F) {
+        // Moving horizontally: snap Y to current tile center Y
+        const Vec2 currentCenter = tileCenter(row, col);
+        position.y = currentCenter.y;
+    } else if (ai.input.y != 0.0F) {
+        // Moving vertically: snap X to current tile center X
+        const Vec2 currentCenter = tileCenter(row, col);
+        position.x = currentCenter.x;
+    }
+
     const float maxStep = enemy.getSpeed() * deltaTime;
     const float dx = target.x - position.x;
     const float dy = target.y - position.y;
@@ -658,21 +804,45 @@ void World::moveEnemyTowardTarget(Character& enemy, EnemyAiState& ai, float delt
         ai.hasTarget = false;
 
         if (ai.escapingOwnBomb && hasBombAt(ai.escapeBombRow, ai.escapeBombCol)) {
-            const auto [currentRow, currentCol] = tileForPosition(enemy.getPosition());
-            const int nextRow = currentRow + (ai.input.y > 0.0F ? 1 : (ai.input.y < 0.0F ? -1 : 0));
-            const int nextCol = currentCol + (ai.input.x > 0.0F ? 1 : (ai.input.x < 0.0F ? -1 : 0));
-            if (!canEnterTile(enemy, nextRow, nextCol) ||
-                (!isTileThreatenedByBomb(currentRow, currentCol, ai.escapeBombRow, ai.escapeBombCol, ai.escapeBombRadius) &&
-                 !isTileThreatenedByBomb(nextRow, nextCol, ai.escapeBombRow, ai.escapeBombCol, ai.escapeBombRadius))) {
-                if (const auto reroute = findEscapeInput(enemy,
-                                                         ai.escapeBombRow,
-                                                         ai.escapeBombCol,
-                                                         ai.escapeBombRadius);
-                    reroute.has_value()) {
-                    ai.input = *reroute;
-                } else {
+            if (!ai.escapePath.empty()) {
+                ai.escapePath.erase(ai.escapePath.begin());
+            }
+
+            if (!ai.escapePath.empty()) {
+                ai.input = ai.escapePath.front();
+            } else {
+                const auto [currentRow, currentCol] = tileForPosition(enemy.getPosition());
+                if (!isTileThreatenedByBomb(currentRow, currentCol, ai.escapeBombRow, ai.escapeBombCol, ai.escapeBombRadius) &&
+                    !isTileDangerous(currentRow, currentCol)) {
                     ai.escapingOwnBomb = false;
+                    ai.input = {};
                     ai.decisionTimer = 0.0F;
+                    return;
+                }
+
+                if (const auto path = findEscapePath(enemy,
+                                                     ai.escapeBombRow,
+                                                     ai.escapeBombCol,
+                                                     ai.escapeBombRadius,
+                                                     ai.escapeBombRadius + 4);
+                    path.has_value() && !path->empty()) {
+                    ai.escapePath = *path;
+                    ai.input = ai.escapePath.front();
+                } else if (isTileThreatenedByBomb(currentRow,
+                                                  currentCol,
+                                                  ai.escapeBombRow,
+                                                  ai.escapeBombCol,
+                                                  ai.escapeBombRadius)) {
+                    if (const auto reroute = findEscapeInput(enemy,
+                                                             ai.escapeBombRow,
+                                                             ai.escapeBombCol,
+                                                             ai.escapeBombRadius);
+                        reroute.has_value()) {
+                        ai.input = *reroute;
+                    } else {
+                        ai.escapingOwnBomb = false;
+                        ai.decisionTimer = 0.0F;
+                    }
                 }
             }
         }
@@ -681,13 +851,9 @@ void World::moveEnemyTowardTarget(Character& enemy, EnemyAiState& ai, float delt
 
     position.x += dx / distance * maxStep;
     position.y += dy / distance * maxStep;
-    if (!collidesWithSolid(enemy, position)) {
-        enemy.setPosition(position);
-    } else {
-        ai.hasTarget = false;
-        ai.input = {};
-        ai.decisionTimer = 0.0F;
-    }
+
+    // Apply smooth aligned position
+    enemy.setPosition(position);
 }
 
 void World::createRandomPowerUp(int row, int col)
@@ -755,7 +921,7 @@ void World::applyPowerUp(Character& character, PowerUpType type)
 void World::updateBombs(float deltaTime)
 {
     for (auto& bomb : bombsList) {
-        if (bomb.entity == nullptr || !bomb.entity->isAlive()) {
+        if (bomb.exploded || bomb.entity == nullptr || !bomb.entity->isAlive()) {
             continue;
         }
 
@@ -767,13 +933,30 @@ void World::updateBombs(float deltaTime)
         bomb.timer -= deltaTime;
     }
 
-    for (std::size_t index = 0; index < bombsList.size();) {
-        if (bombsList[index].entity != nullptr && bombsList[index].entity->isAlive() && bombsList[index].timer <= 0.0F) {
+    bool detonatedBomb = true;
+    while (detonatedBomb) {
+        detonatedBomb = false;
+        for (std::size_t index = 0; index < bombsList.size(); ++index) {
+            if (bombsList[index].exploded ||
+                bombsList[index].entity == nullptr ||
+                !bombsList[index].entity->isAlive() ||
+                bombsList[index].timer > 0.0F) {
+                continue;
+            }
+
             explodeBomb(index);
-        } else {
-            ++index;
+            detonatedBomb = true;
         }
     }
+
+    bombsList.erase(std::remove_if(bombsList.begin(),
+                                   bombsList.end(),
+                                   [](const BombState& bomb) {
+                                       return bomb.exploded ||
+                                              bomb.entity == nullptr ||
+                                              !bomb.entity->isAlive();
+                                   }),
+                    bombsList.end());
 }
 
 void World::updateExplosions(float deltaTime)
@@ -788,11 +971,12 @@ void World::updateExplosions(float deltaTime)
 
 void World::explodeBomb(std::size_t index)
 {
-    if (index >= bombsList.size() || bombsList[index].entity == nullptr) {
+    if (index >= bombsList.size() || bombsList[index].exploded || bombsList[index].entity == nullptr) {
         return;
     }
 
     auto bomb = bombsList[index];
+    bombsList[index].exploded = true;
     const auto [row, col] = tileForPosition(bomb.entity->getPosition());
     bomb.entity->killEntity();
 
@@ -816,8 +1000,6 @@ void World::explodeBomb(std::size_t index)
             }
         }
     }
-
-    bombsList.erase(bombsList.begin() + static_cast<std::ptrdiff_t>(index));
 }
 
 void World::createExplosionTile(int row, int col)
@@ -829,7 +1011,7 @@ void World::createExplosionTile(int row, int col)
 
 bool World::applyExplosionToTile(int row, int col)
 {
-    if (row < 0 || col < 0 || row >= numRows || col >= numCols) {
+    if (!isInsideArena(row, col)) {
         return false;
     }
 
@@ -878,15 +1060,11 @@ bool World::applyExplosionToTile(int row, int col)
             }
             break;
 
-        case EntityType::PowerUp:
-            entity->killEntity();
-            break;
-
         case EntityType::Bomb: {
             const auto foundBomb = std::find_if(bombsList.begin(), bombsList.end(), [&entity](const BombState& state) {
                 return state.entity != nullptr && state.entity->getId() == entity->getId();
             });
-            if (foundBomb != bombsList.end()) {
+            if (foundBomb != bombsList.end() && !foundBomb->exploded) {
                 foundBomb->timer = 0.0F;
             }
             break;
@@ -895,6 +1073,7 @@ bool World::applyExplosionToTile(int row, int col)
         case EntityType::Wall:
         case EntityType::DestructibleBlock:
         case EntityType::Explosion:
+        case EntityType::PowerUp:
             break;
         }
     }
@@ -929,4 +1108,4 @@ void World::removeDeadTransientEntities()
                        entitiesList.end());
 }
 
-}
+} // namespace bomberman::logic

@@ -8,6 +8,7 @@
 #include <SFML/Graphics/Texture.hpp>
 
 #include <memory>
+#include <optional>
 #include <vector>
 
 namespace bomberman::sfml {
@@ -23,7 +24,8 @@ public:
     std::shared_ptr<logic::Block> createBlock(std::size_t id,
                                                logic::EntityType type,
                                                logic::Vec2 position,
-                                               logic::Vec2 size) override;
+                                               logic::Vec2 size,
+                                               std::optional<logic::ExplosionShape> explosionShape = std::nullopt) override;
     std::shared_ptr<logic::PowerUp> createPowerUp(std::size_t id,
                                                    logic::Vec2 position,
                                                    logic::Vec2 size,
