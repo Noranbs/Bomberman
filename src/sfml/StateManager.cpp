@@ -51,7 +51,8 @@ void renderHud(StateManager& manager)
             << std::setw(2) << seconds << std::setfill(' ');
 
     if (player != nullptr) {
-        hudText << "   Bombs: " << player->getAvailableBombs() << '/' << player->getBombCapacity()
+        hudText << "   Lives: " << manager.world().playerLives()
+                << "   Bombs: " << player->getAvailableBombs() << '/' << player->getBombCapacity()
                 << "   Fire: " << player->getBombRadius()
                 << "   Speed: " << std::fixed << std::setprecision(1) << player->getSpeedMultiplier() << 'x';
     }

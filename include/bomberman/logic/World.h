@@ -35,6 +35,7 @@ public:
     Vec2 tileSize() const { return tileDimensions; }
     std::shared_ptr<Score> score() const { return scoreTracker; }
     float elapsedTime() const { return totalTime; }
+    int playerLives() const { return remainingPlayerLives; }
     int enemiesAlive() const;
     bool playerWon() const { return hasWon; }
 
@@ -114,6 +115,7 @@ private:
     void explodeBomb(std::size_t index);
     void createExplosionTile(int row, int col);
     bool applyExplosionToTile(int row, int col);
+    void damagePlayer();
     void removeDeadTransientEntities();
 
     std::shared_ptr<EntityFactory> factory;
@@ -131,6 +133,7 @@ private:
     Vec2 tileDimensions{};
     Vec2 playerInput{};
     float totalTime{0.0F};
+    int remainingPlayerLives{5};
     bool hasWon{false};
 };
 

@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
-#include <cstdio>
 #include <queue>
 #include <stdexcept>
 #include <utility>
@@ -32,6 +31,7 @@ void World::startNewGame()
     entityCounter = 1;
     playerInput = {};
     totalTime = 0.0F;
+    remainingPlayerLives = 5;
     hasWon = false;
 
     scoreTracker->resetCurrentScore();
@@ -1044,12 +1044,13 @@ bool World::applyExplosionToTile(int row, int col)
 
         switch (entity->getType()) {
         case EntityType::Player:
+            damagePlayer();
+            break;
+
         case EntityType::Enemy:
             entity->killEntity();
-            if (entity->getType() == EntityType::Player) {
-                scoreTracker->onNotify({EventType::PlayerLost, entity->getId(), 0});
-            } else {
-                scoreTracker->onNotify({EventType::EnemyKilled, entity->getId(), 250});
+            scoreTracker->onNotify({EventType::EnemyKilled, entity->getId(), 250});
+            {
                 const bool enemiesRemain = std::any_of(enemiesList.begin(), enemiesList.end(), [](const auto& enemy) {
                     return enemy != nullptr && enemy->isAlive();
                 });
@@ -1079,6 +1080,24 @@ bool World::applyExplosionToTile(int row, int col)
     }
 
     return true;
+}
+
+void World::damagePlayer()
+{
+    if (playerChar == nullptr || !playerChar->isAlive()) {
+        return;
+    }
+
+    --remainingPlayerLives;
+    if (remainingPlayerLives <= 0) {
+        remainingPlayerLives = 0;
+        playerChar->killEntity();
+        scoreTracker->onNotify({EventType::PlayerLost, playerChar->getId(), 0});
+        return;
+    }
+
+    playerInput = {};
+    playerChar->setPosition(tileCenter(1, 1));
 }
 
 void World::removeDeadTransientEntities()
