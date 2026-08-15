@@ -978,13 +978,15 @@ void World::explodeBomb(std::size_t index)
     auto bomb = bombsList[index];
     bombsList[index].exploded = true;
     const auto [row, col] = tileForPosition(bomb.entity->getPosition());
+    const auto owner = bomb.owner.lock();
+    const bool playerOwnedBomb = owner != nullptr && owner->getType() == EntityType::Player;
     bomb.entity->killEntity();
 
-    if (const auto owner = bomb.owner.lock(); owner != nullptr) {
+    if (owner != nullptr) {
         owner->replenishBomb();
     }
 
-    applyExplosionToTile(row, col);
+    applyExplosionToTile(row, col, playerOwnedBomb);
 
     static constexpr std::array<std::pair<int, int>, 4> directions{
         std::pair<int, int>{-1, 0},
@@ -995,7 +997,7 @@ void World::explodeBomb(std::size_t index)
 
     for (const auto& [rowStep, colStep] : directions) {
         for (int distance = 1; distance <= bomb.radius; ++distance) {
-            if (!applyExplosionToTile(row + rowStep * distance, col + colStep * distance)) {
+            if (!applyExplosionToTile(row + rowStep * distance, col + colStep * distance, playerOwnedBomb)) {
                 break;
             }
         }
@@ -1009,7 +1011,7 @@ void World::createExplosionTile(int row, int col)
     entitiesList.push_back(explosion);
 }
 
-bool World::applyExplosionToTile(int row, int col)
+bool World::applyExplosionToTile(int row, int col, bool playerOwnedBomb)
 {
     if (!isInsideArena(row, col)) {
         return false;
@@ -1032,7 +1034,9 @@ bool World::applyExplosionToTile(int row, int col)
 
     if (destructibleBlock != entitiesList.end()) {
         (*destructibleBlock)->killEntity();
-        scoreTracker->onNotify({EventType::BlockDestroyed, (*destructibleBlock)->getId(), 50});
+        if (playerOwnedBomb) {
+            scoreTracker->onNotify({EventType::BlockDestroyed, (*destructibleBlock)->getId(), 50});
+        }
         createRandomPowerUp(row, col);
         return false;
     }
@@ -1049,7 +1053,9 @@ bool World::applyExplosionToTile(int row, int col)
 
         case EntityType::Enemy:
             entity->killEntity();
-            scoreTracker->onNotify({EventType::EnemyKilled, entity->getId(), 250});
+            if (playerOwnedBomb) {
+                scoreTracker->onNotify({EventType::EnemyKilled, entity->getId(), 250});
+            }
             {
                 const bool enemiesRemain = std::any_of(enemiesList.begin(), enemiesList.end(), [](const auto& enemy) {
                     return enemy != nullptr && enemy->isAlive();

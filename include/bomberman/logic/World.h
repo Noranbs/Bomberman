@@ -114,7 +114,7 @@ private:
     void updateExplosions(float deltaTime);
     void explodeBomb(std::size_t index);
     void createExplosionTile(int row, int col);
-    bool applyExplosionToTile(int row, int col);
+    bool applyExplosionToTile(int row, int col, bool playerOwnedBomb);
     void damagePlayer();
     void removeDeadTransientEntities();
 
