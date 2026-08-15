@@ -25,6 +25,7 @@ public:
     explicit World(std::shared_ptr<EntityFactory> factory);
 
     void startNewGame();
+    void startNextLevel();
     void update(float deltaTime);
     void handlePlayerAction(Action action, bool active);
 
@@ -36,6 +37,7 @@ public:
     std::shared_ptr<Score> score() const { return scoreTracker; }
     float elapsedTime() const { return totalTime; }
     int playerLives() const { return remainingPlayerLives; }
+    int currentLevel() const { return levelNumber; }
     int enemiesAlive() const;
     bool playerWon() const { return hasWon; }
 
@@ -51,7 +53,7 @@ private:
 
     struct ExplosionState {
         std::shared_ptr<Block> entity{};
-        float timer{0.35F};
+        float timer{0.65F};
     };
 
     struct EnemyAiState {
@@ -67,6 +69,12 @@ private:
         int targetRow{0};
         int targetCol{0};
         std::vector<Vec2> escapePath{};
+    };
+
+    struct PlayerStats {
+        int bombRadius{1};
+        int bombCapacity{1};
+        float speed{0.5F};
     };
 
     std::size_t nextId();
@@ -98,8 +106,16 @@ private:
     [[nodiscard]] bool bombBlocksCharacter(const Entity& bomb, const Character& character) const;
     [[nodiscard]] bool hasBombAt(int row, int col) const;
     [[nodiscard]] bool hasAdjacentDestructibleBlock(int row, int col) const;
+    [[nodiscard]] bool levelObjectivesComplete() const;
 
     void createArena();
+    void clearArenaEntities();
+    void applyEnemyLevelBonus(Character& enemy);
+    void savePlayerStats();
+    void restorePlayerStats();
+    void resetPlayerStats();
+    void updateLevelExit();
+    void createLevelExit();
     void createBlock(EntityType type, int row, int col);
     void moveCharacter(Character& character, Vec2 velocity, float deltaTime);
     void placePlayerBomb();
@@ -126,6 +142,7 @@ private:
     std::vector<BombState> bombsList{};
     std::vector<ExplosionState> explosionsList{};
     std::vector<std::shared_ptr<PowerUp>> powerUpsList{};
+    std::shared_ptr<Block> levelExit{};
     std::vector<EnemyAiState> enemyAiStates{};
     std::size_t entityCounter{1};
     int numRows{13};
@@ -134,6 +151,8 @@ private:
     Vec2 playerInput{};
     float totalTime{0.0F};
     int remainingPlayerLives{5};
+    int levelNumber{1};
+    PlayerStats savedPlayerStats{};
     bool hasWon{false};
 };
 

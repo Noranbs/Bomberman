@@ -24,6 +24,7 @@ private:
 
     std::shared_ptr<sf::RenderWindow> window;
     std::shared_ptr<sf::Texture> texture;
+    std::shared_ptr<sf::Texture> tileTexture;
     sf::Font font;
     std::shared_ptr<SfmlFactory> factory;
     logic::World world;

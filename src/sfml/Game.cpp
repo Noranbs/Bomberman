@@ -8,7 +8,8 @@ namespace bomberman::sfml {
 Game::Game()
     : window(std::make_shared<sf::RenderWindow>(sf::VideoMode(960, 832), "Bomberman AP")),
       texture(std::make_shared<sf::Texture>()),
-      factory(std::make_shared<SfmlFactory>(window, texture)),
+      tileTexture(std::make_shared<sf::Texture>()),
+      factory(std::make_shared<SfmlFactory>(window, texture, tileTexture)),
       world(factory),
       stateManager(window, font, factory, world)
 {
@@ -17,6 +18,13 @@ Game::Game()
     if (!texture->loadFromFile("assets/bomberman.png")) {
         throw std::runtime_error("Unable to load assets/bomberman.png");
     }
+    texture->setSmooth(false);
+
+    if (!tileTexture->loadFromFile("assets/NES - Bomberman - Miscellaneous - General Sprites.png")) {
+        throw std::runtime_error("Unable to load wall sprite sheet");
+    }
+    tileTexture->setSmooth(false);
+
     if (!font.loadFromFile("assets/LiberationSans-Bold.ttf")) {
         throw std::runtime_error("Unable to load assets/LiberationSans-Bold.ttf");
     }

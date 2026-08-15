@@ -45,6 +45,7 @@ public:
     void update(float deltaTime);
     void render();
     void transitionTo(StateId stateId);
+    void continueToNextLevel();
 
     std::shared_ptr<sf::RenderWindow> window() const;
     const sf::Font& font() const;

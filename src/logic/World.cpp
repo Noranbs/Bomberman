@@ -21,27 +21,36 @@ World::World(std::shared_ptr<EntityFactory> factory)
 
 void World::startNewGame()
 {
-    entitiesList.clear();
-    enemiesList.clear();
-    bombsList.clear();
-    explosionsList.clear();
-    powerUpsList.clear();
-    enemyAiStates.clear();
-    playerChar.reset();
+    clearArenaEntities();
     entityCounter = 1;
     playerInput = {};
     totalTime = 0.0F;
     remainingPlayerLives = 5;
+    levelNumber = 1;
+    resetPlayerStats();
     hasWon = false;
 
     scoreTracker->resetCurrentScore();
     createArena();
 }
 
+void World::startNextLevel()
+{
+    savePlayerStats();
+    ++levelNumber;
+    clearArenaEntities();
+    playerInput = {};
+    hasWon = false;
+    createArena();
+}
+
 void World::update(float deltaTime)
 {
     if (playerChar != nullptr && playerChar->isAlive()) {
-        moveCharacter(*playerChar, playerInput * playerChar->getSpeed(), deltaTime);
+        playerChar->updateStatus(deltaTime);
+        if (!playerChar->isFrozen()) {
+            moveCharacter(*playerChar, playerInput * playerChar->getSpeed(), deltaTime);
+        }
         totalTime += deltaTime;
         scoreTracker->addSurvivalTimeScore(deltaTime);
     }
@@ -50,6 +59,7 @@ void World::update(float deltaTime)
     updateBombs(deltaTime);
     updateExplosions(deltaTime);
     removeDeadTransientEntities();
+    updateLevelExit();
 }
 
 void World::handlePlayerAction(Action action, bool active)
@@ -479,6 +489,10 @@ Vec2 World::chooseEnemyInput(Character& enemy)
         if (powerUp == nullptr || !powerUp->isAlive()) {
             continue;
         }
+        const auto powerUpType = powerUp->powerUpType();
+        if (powerUpType == PowerUpType::Freeze || powerUpType == PowerUpType::Skull) {
+            continue;
+        }
 
         const auto [powerUpRow, powerUpCol] = tileForPosition(powerUp->getPosition());
         const int rowDistance = powerUpRow - row;
@@ -566,6 +580,27 @@ bool World::hasAdjacentDestructibleBlock(int row, int col) const
     });
 }
 
+bool World::levelObjectivesComplete() const
+{
+    const bool destructibleBlocksRemain = std::any_of(entitiesList.begin(), entitiesList.end(), [](const auto& entity) {
+        return entity != nullptr && entity->isAlive() && entity->getType() == EntityType::DestructibleBlock;
+    });
+
+    const bool powerUpsRemain = std::any_of(powerUpsList.begin(), powerUpsList.end(), [](const auto& powerUp) {
+        return powerUp != nullptr && powerUp->isAlive();
+    });
+
+    const bool bombsRemain = std::any_of(bombsList.begin(), bombsList.end(), [](const BombState& bomb) {
+        return !bomb.exploded && bomb.entity != nullptr && bomb.entity->isAlive();
+    });
+
+    const bool explosionsRemain = std::any_of(explosionsList.begin(), explosionsList.end(), [](const ExplosionState& explosion) {
+        return explosion.entity != nullptr && explosion.entity->isAlive();
+    });
+
+    return enemiesAlive() == 0 && !destructibleBlocksRemain && !powerUpsRemain && !bombsRemain && !explosionsRemain;
+}
+
 void World::createArena()
 {
     for (int row = 0; row < numRows; ++row) {
@@ -587,6 +622,7 @@ void World::createArena()
 
     const Vec2 characterSize{tileDimensions.x * 0.58F, tileDimensions.y * 0.70F};
     playerChar = factory->createCharacter(nextId(), EntityType::Player, tileCenter(1, 1), characterSize);
+    restorePlayerStats();
     playerChar->addObserver(scoreTracker);
     entitiesList.push_back(playerChar);
 
@@ -598,10 +634,89 @@ void World::createArena()
 
     for (const auto& position : enemyPositions) {
         auto enemy = factory->createCharacter(nextId(), EntityType::Enemy, position, characterSize);
+        applyEnemyLevelBonus(*enemy);
         enemiesList.push_back(enemy);
-        enemyAiStates.push_back({enemy, {}, Random::instance().getRandomFloat(0.2F, 0.8F), 1.0F});
+        const float firstDecisionDelay = std::max(0.05F, Random::instance().getRandomFloat(0.2F, 0.8F) - 0.04F * static_cast<float>(levelNumber - 1));
+        const float firstBombCooldown = std::max(0.25F, 1.0F - 0.1F * static_cast<float>(levelNumber - 1));
+        enemyAiStates.push_back({enemy, {}, firstDecisionDelay, firstBombCooldown});
         entitiesList.push_back(enemy);
     }
+}
+
+void World::clearArenaEntities()
+{
+    entitiesList.clear();
+    enemiesList.clear();
+    bombsList.clear();
+    explosionsList.clear();
+    powerUpsList.clear();
+    enemyAiStates.clear();
+    playerChar.reset();
+    levelExit.reset();
+}
+
+void World::applyEnemyLevelBonus(Character& enemy)
+{
+    const int bonusSteps = levelNumber - 1;
+    for (int step = 0; step < bonusSteps; ++step) {
+        if (step % 3 == 0) {
+            enemy.boostMovementSpeed(0.05F);
+        } else if (step % 3 == 1) {
+            enemy.expandExplosionRange();
+        } else {
+            enemy.increaseMaxBombs();
+        }
+    }
+}
+
+void World::savePlayerStats()
+{
+    if (playerChar == nullptr) {
+        return;
+    }
+
+    savedPlayerStats.bombRadius = playerChar->getBombRadius();
+    savedPlayerStats.bombCapacity = playerChar->getBombCapacity();
+    savedPlayerStats.speed = playerChar->getSpeed();
+}
+
+void World::restorePlayerStats()
+{
+    if (playerChar == nullptr) {
+        return;
+    }
+
+    playerChar->setBombRadius(savedPlayerStats.bombRadius);
+    playerChar->setBombCapacity(savedPlayerStats.bombCapacity);
+    playerChar->setSpeed(savedPlayerStats.speed);
+}
+
+void World::resetPlayerStats()
+{
+    savedPlayerStats = {};
+}
+
+void World::updateLevelExit()
+{
+    if (hasWon || playerChar == nullptr || !playerChar->isAlive()) {
+        return;
+    }
+
+    if (levelExit == nullptr && levelObjectivesComplete()) {
+        createLevelExit();
+    }
+
+    if (levelExit != nullptr && levelExit->isAlive() && playerChar->getBounds().intersects(levelExit->getBounds())) {
+        hasWon = true;
+        scoreTracker->onNotify({EventType::PlayerWon, playerChar->getId(), 1000});
+    }
+}
+
+void World::createLevelExit()
+{
+    const Vec2 size{tileDimensions.x * 0.8F, tileDimensions.y * 0.8F};
+    levelExit = factory->createBlock(nextId(), EntityType::Exit, tileCenter(numRows / 2, numCols / 2), size);
+    entitiesList.push_back(levelExit);
 }
 
 void World::createBlock(EntityType type, int row, int col)
@@ -623,7 +738,29 @@ void World::moveCharacter(Character& character, Vec2 velocity, float deltaTime)
         velocity = velocity * character.getSpeed();
     }
 
-    const Vec2 current = character.getPosition();
+    Vec2 current = character.getPosition();
+    const auto [row, col] = tileForPosition(current);
+    const Vec2 laneCenter = tileCenter(row, col);
+    const float maxAssist = character.getSpeed() * deltaTime * 0.75F;
+    const float horizontalTolerance = tileDimensions.x * 0.32F;
+    const float verticalTolerance = tileDimensions.y * 0.32F;
+
+    if (velocity.y != 0.0F && velocity.x == 0.0F && std::abs(laneCenter.x - current.x) <= horizontalTolerance) {
+        Vec2 assisted{current.x + std::clamp(laneCenter.x - current.x, -maxAssist, maxAssist), current.y};
+        if (!collidesWithSolid(character, assisted)) {
+            character.setPosition(assisted);
+            current = character.getPosition();
+        }
+    }
+
+    if (velocity.x != 0.0F && velocity.y == 0.0F && std::abs(laneCenter.y - current.y) <= verticalTolerance) {
+        Vec2 assisted{current.x, current.y + std::clamp(laneCenter.y - current.y, -maxAssist, maxAssist)};
+        if (!collidesWithSolid(character, assisted)) {
+            character.setPosition(assisted);
+            current = character.getPosition();
+        }
+    }
+
     const Vec2 horizontal{current.x + velocity.x * deltaTime, current.y};
     if (!collidesWithSolid(character, horizontal)) {
         character.setPosition(horizontal);
@@ -663,6 +800,13 @@ void World::updateEnemies(float deltaTime)
     for (auto& ai : enemyAiStates) {
         const auto enemy = ai.enemy.lock();
         if (enemy == nullptr || !enemy->isAlive()) {
+            continue;
+        }
+
+        enemy->updateStatus(deltaTime);
+        if (enemy->isFrozen()) {
+            ai.input = {};
+            ai.hasTarget = false;
             continue;
         }
 
@@ -862,7 +1006,8 @@ void World::createRandomPowerUp(int row, int col)
         return;
     }
 
-    const int typeIndex = Random::instance().getRandomInt(0, 2);
+    const int unlockedTypes = std::min(6, 3 + levelNumber - 1);
+    const int typeIndex = Random::instance().getRandomInt(0, unlockedTypes - 1);
     const auto type = static_cast<PowerUpType>(typeIndex);
     const Vec2 size{tileDimensions.x * 0.58F, tileDimensions.y * 0.58F};
     auto powerUp = factory->createPowerUp(nextId(), tileCenter(row, col), size, type);
@@ -897,7 +1042,9 @@ void World::collectPowerUps(Character& character)
 
         applyPowerUp(character, *powerUpType);
         powerUp->killEntity();
-        if (character.getType() == EntityType::Player) {
+        if (character.getType() == EntityType::Player &&
+            *powerUpType != PowerUpType::Freeze &&
+            *powerUpType != PowerUpType::Skull) {
             scoreTracker->onNotify({EventType::PowerUpCollected, powerUp->getId(), 100});
         }
     }
@@ -908,12 +1055,38 @@ void World::applyPowerUp(Character& character, PowerUpType type)
     switch (type) {
     case PowerUpType::Fire:
         character.expandExplosionRange();
+        if (character.getType() == EntityType::Player) {
+            savePlayerStats();
+        }
         break;
     case PowerUpType::ExtraBomb:
         character.increaseMaxBombs();
+        if (character.getType() == EntityType::Player) {
+            savePlayerStats();
+        }
         break;
     case PowerUpType::Skates:
         character.boostMovementSpeed(0.12F);
+        if (character.getType() == EntityType::Player) {
+            savePlayerStats();
+        }
+        break;
+    case PowerUpType::Freeze:
+        character.freeze(2.5F);
+        break;
+    case PowerUpType::Skull:
+        if (character.getType() == EntityType::Player) {
+            damagePlayer();
+        } else {
+            character.killEntity();
+        }
+        break;
+    case PowerUpType::Heart:
+        if (character.getType() == EntityType::Player) {
+            ++remainingPlayerLives;
+        } else {
+            character.increaseMaxBombs();
+        }
         break;
     }
 }
@@ -1007,7 +1180,7 @@ void World::explodeBomb(std::size_t index)
 void World::createExplosionTile(int row, int col)
 {
     auto explosion = factory->createBlock(nextId(), EntityType::Explosion, tileCenter(row, col), tileDimensions);
-    explosionsList.push_back({explosion, 0.35F});
+    explosionsList.push_back({explosion, 0.65F});
     entitiesList.push_back(explosion);
 }
 
@@ -1056,15 +1229,6 @@ bool World::applyExplosionToTile(int row, int col, bool playerOwnedBomb)
             if (playerOwnedBomb) {
                 scoreTracker->onNotify({EventType::EnemyKilled, entity->getId(), 250});
             }
-            {
-                const bool enemiesRemain = std::any_of(enemiesList.begin(), enemiesList.end(), [](const auto& enemy) {
-                    return enemy != nullptr && enemy->isAlive();
-                });
-                if (!enemiesRemain && playerChar != nullptr && playerChar->isAlive() && !hasWon) {
-                    hasWon = true;
-                    scoreTracker->onNotify({EventType::PlayerWon, playerChar->getId(), 1000});
-                }
-            }
             break;
 
         case EntityType::Bomb: {
@@ -1081,6 +1245,7 @@ bool World::applyExplosionToTile(int row, int col, bool playerOwnedBomb)
         case EntityType::DestructibleBlock:
         case EntityType::Explosion:
         case EntityType::PowerUp:
+        case EntityType::Exit:
             break;
         }
     }
@@ -1103,6 +1268,8 @@ void World::damagePlayer()
     }
 
     playerInput = {};
+    resetPlayerStats();
+    restorePlayerStats();
     playerChar->setPosition(tileCenter(1, 1));
 }
 

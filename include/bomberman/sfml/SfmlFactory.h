@@ -15,7 +15,9 @@ namespace bomberman::sfml {
 
 class SfmlFactory final : public logic::EntityFactory {
 public:
-    SfmlFactory(std::shared_ptr<sf::RenderWindow> window, std::shared_ptr<sf::Texture> texture);
+    SfmlFactory(std::shared_ptr<sf::RenderWindow> window,
+                std::shared_ptr<sf::Texture> texture,
+                std::shared_ptr<sf::Texture> tileTexture);
 
     std::shared_ptr<logic::Character> createCharacter(std::size_t id,
                                                        logic::EntityType type,
@@ -38,13 +40,14 @@ private:
     template <typename EntityT>
     void attachView(const std::shared_ptr<EntityT>& entity)
     {
-        auto view = std::make_shared<SpriteView>(entity, window, texture);
+        auto view = std::make_shared<SpriteView>(entity, window, texture, tileTexture);
         entity->addObserver(view);
         views.push_back(view);
     }
 
     std::shared_ptr<sf::RenderWindow> window;
     std::shared_ptr<sf::Texture> texture;
+    std::shared_ptr<sf::Texture> tileTexture;
     std::vector<std::shared_ptr<SpriteView>> views{};
 };
 

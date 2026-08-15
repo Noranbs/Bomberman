@@ -2,8 +2,10 @@
 
 namespace bomberman::sfml {
 
-SfmlFactory::SfmlFactory(std::shared_ptr<sf::RenderWindow> window, std::shared_ptr<sf::Texture> texture)
-    : window(std::move(window)), texture(std::move(texture))
+SfmlFactory::SfmlFactory(std::shared_ptr<sf::RenderWindow> window,
+                         std::shared_ptr<sf::Texture> texture,
+                         std::shared_ptr<sf::Texture> tileTexture)
+    : window(std::move(window)), texture(std::move(texture)), tileTexture(std::move(tileTexture))
 {
 }
 

@@ -18,7 +18,8 @@ enum class EntityType {
     DestructibleBlock,
     Bomb,
     Explosion,
-    PowerUp
+    PowerUp,
+    Exit
 };
 
 enum class Direction {
@@ -31,7 +32,10 @@ enum class Direction {
 enum class PowerUpType {
     Fire,
     ExtraBomb,
-    Skates
+    Skates,
+    Freeze,
+    Skull,
+    Heart
 };
 
 enum class ExplosionShape {
@@ -60,6 +64,7 @@ public:
     [[nodiscard]] virtual bool blocksMovement() const;
     [[nodiscard]] virtual std::optional<PowerUpType> powerUpType() const;
     [[nodiscard]] virtual std::optional<ExplosionShape> explosionShape() const;
+    [[nodiscard]] virtual std::optional<Direction> facingDirection() const;
 
     void setPosition(Vec2 position);
     void killEntity();
@@ -81,10 +86,12 @@ public:
     Character(std::size_t id, EntityType type, Vec2 position, Vec2 size);
 
     Direction getDirection() const { return facingDir; }
+    [[nodiscard]] std::optional<Direction> facingDirection() const override;
 
     float getSpeed() const { return moveSpeed; }
 
-    float getSpeedMultiplier() const { return moveSpeed / 0.55F; }
+    float getSpeedMultiplier() const { return moveSpeed; }
+    bool isFrozen() const { return freezeTimer > 0.0F; }
 
     int getBombRadius() const { return explosionRadius; }
 
@@ -92,8 +99,13 @@ public:
 
     int getBombCapacity() const { return maxBombs; }
 
-    void setDirection(Direction direction) { facingDir = direction; }
+    void setDirection(Direction direction);
+    void setBombRadius(int radius);
+    void setBombCapacity(int capacity);
+    void setSpeed(float speed);
     void boostMovementSpeed(float amount);
+    void freeze(float seconds);
+    void updateStatus(float deltaTime);
 
     void expandExplosionRange();
 
@@ -105,7 +117,8 @@ public:
 
 private:
     Direction facingDir{Direction::Down};
-    float moveSpeed{0.55F};
+    float moveSpeed{0.5F};
+    float freezeTimer{0.0F};
     int explosionRadius{1};
     int maxBombs{1};
     int activeBombs{0};

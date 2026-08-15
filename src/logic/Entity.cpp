@@ -29,6 +29,11 @@ std::optional<ExplosionShape> Entity::explosionShape() const
     return std::nullopt;
 }
 
+std::optional<Direction> Entity::facingDirection() const
+{
+    return std::nullopt;
+}
+
 void Entity::setPosition(Vec2 position)
 {
     pos = position;
@@ -72,6 +77,46 @@ Character::Character(std::size_t id, EntityType type, Vec2 position, Vec2 size)
 void Character::boostMovementSpeed(float amount)
 {
     moveSpeed += amount;
+}
+
+void Character::freeze(float seconds)
+{
+    freezeTimer = std::max(freezeTimer, seconds);
+}
+
+void Character::updateStatus(float deltaTime)
+{
+    freezeTimer = std::max(0.0F, freezeTimer - deltaTime);
+}
+
+std::optional<Direction> Character::facingDirection() const
+{
+    return facingDir;
+}
+
+void Character::setDirection(Direction direction)
+{
+    if (facingDir == direction) {
+        return;
+    }
+    facingDir = direction;
+    notify({EventType::EntityMoved, getId(), 0});
+}
+
+void Character::setBombRadius(int radius)
+{
+    explosionRadius = std::max(1, radius);
+}
+
+void Character::setBombCapacity(int capacity)
+{
+    maxBombs = std::max(1, capacity);
+    activeBombs = std::min(activeBombs, maxBombs);
+}
+
+void Character::setSpeed(float speed)
+{
+    moveSpeed = std::max(0.1F, speed);
 }
 
 void Character::expandExplosionRange()

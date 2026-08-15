@@ -46,7 +46,8 @@ void renderHud(StateManager& manager)
     const auto player = manager.world().player();
 
     std::ostringstream hudText;
-    hudText << "Score: " << manager.world().score()->getCurrentScore()
+    hudText << "Level: " << manager.world().currentLevel()
+            << "   Score: " << manager.world().score()->getCurrentScore()
             << "   Time: " << std::setfill('0') << std::setw(2) << minutes << ':'
             << std::setw(2) << seconds << std::setfill(' ');
 
@@ -113,16 +114,30 @@ public:
 
     void processEvent(const sf::Event& event) override
     {
-        if (event.type == sf::Event::KeyPressed) {
-            handleKey(event.key.code, true);
+        if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Enter) {
+            paused = !paused;
+            manager.world().handlePlayerAction(logic::Action::StopHorizontal, true);
+            manager.world().handlePlayerAction(logic::Action::StopVertical, true);
         }
-        if (event.type == sf::Event::KeyReleased) {
-            handleKey(event.key.code, false);
+
+        if (paused && event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) {
+            manager.world().handlePlayerAction(logic::Action::StopHorizontal, true);
+            manager.world().handlePlayerAction(logic::Action::StopVertical, true);
+            manager.transitionTo(StateId::Menu);
+        }
+
+        if (!paused && event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space) {
+            manager.world().handlePlayerAction(logic::Action::PlaceBomb, true);
         }
     }
 
     void update(float deltaTime) override
     {
+        if (paused) {
+            return;
+        }
+
+        syncMovementInput();
         manager.world().update(deltaTime);
         if (manager.world().player() != nullptr && !manager.world().player()->isAlive()) {
             manager.transitionTo(StateId::GameOver);
@@ -135,35 +150,56 @@ public:
     {
         manager.factory()->drawViews();
         renderHud(manager);
+        if (paused) {
+            renderPauseOverlay();
+        }
     }
 
 private:
-    void handleKey(sf::Keyboard::Key key, bool pressed)
+    void renderPauseOverlay()
     {
-        switch (key) {
-        case sf::Keyboard::Left:
-        case sf::Keyboard::A:
-            manager.world().handlePlayerAction(logic::Action::MoveLeft, pressed);
-            break;
-        case sf::Keyboard::Right:
-        case sf::Keyboard::D:
-            manager.world().handlePlayerAction(logic::Action::MoveRight, pressed);
-            break;
-        case sf::Keyboard::Up:
-        case sf::Keyboard::W:
-            manager.world().handlePlayerAction(logic::Action::MoveUp, pressed);
-            break;
-        case sf::Keyboard::Down:
-        case sf::Keyboard::S:
-            manager.world().handlePlayerAction(logic::Action::MoveDown, pressed);
-            break;
-        case sf::Keyboard::Space:
-            manager.world().handlePlayerAction(logic::Action::PlaceBomb, pressed);
-            break;
-        default:
-            break;
+        sf::RectangleShape overlay({960.0F, 832.0F});
+        overlay.setFillColor(sf::Color(12, 16, 20, 150));
+        manager.window()->draw(overlay);
+
+        sf::Text title("Paused", manager.font(), 64);
+        title.setPosition(360.0F, 330.0F);
+        manager.window()->draw(title);
+
+        sf::Text prompt("Press Enter to resume", manager.font(), 28);
+        prompt.setPosition(322.0F, 415.0F);
+        manager.window()->draw(prompt);
+
+        sf::Text menuPrompt("Press Esc to return to menu", manager.font(), 24);
+        menuPrompt.setPosition(310.0F, 462.0F);
+        manager.window()->draw(menuPrompt);
+    }
+
+    void syncMovementInput()
+    {
+        const bool left = sf::Keyboard::isKeyPressed(sf::Keyboard::Left) || sf::Keyboard::isKeyPressed(sf::Keyboard::A);
+        const bool right = sf::Keyboard::isKeyPressed(sf::Keyboard::Right) || sf::Keyboard::isKeyPressed(sf::Keyboard::D);
+        const bool up = sf::Keyboard::isKeyPressed(sf::Keyboard::Up) || sf::Keyboard::isKeyPressed(sf::Keyboard::W);
+        const bool down = sf::Keyboard::isKeyPressed(sf::Keyboard::Down) || sf::Keyboard::isKeyPressed(sf::Keyboard::S);
+
+        if (left == right) {
+            manager.world().handlePlayerAction(logic::Action::StopHorizontal, true);
+        } else if (left) {
+            manager.world().handlePlayerAction(logic::Action::MoveLeft, true);
+        } else {
+            manager.world().handlePlayerAction(logic::Action::MoveRight, true);
+        }
+
+        if (up == down) {
+            manager.world().handlePlayerAction(logic::Action::StopVertical, true);
+        } else if (up) {
+            manager.world().handlePlayerAction(logic::Action::MoveUp, true);
+        } else {
+            manager.world().handlePlayerAction(logic::Action::MoveDown, true);
         }
     }
+
+    bool paused{false};
 };
 
 class GameOverState final : public State {
@@ -221,14 +257,14 @@ public:
             const auto mouse = sf::Vector2f(static_cast<float>(event.mouseButton.x),
                                            static_cast<float>(event.mouseButton.y));
             if (playAgainButtonBounds.contains(mouse)) {
-                manager.transitionTo(StateId::Playing);
+                startNextLevel();
             } else if (menuButtonBounds.contains(mouse)) {
                 manager.transitionTo(StateId::Menu);
             }
         }
 
         if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Enter) {
-            manager.transitionTo(StateId::Playing);
+            startNextLevel();
         }
     }
 
@@ -243,16 +279,22 @@ public:
         overlay.setFillColor(sf::Color(12, 24, 20, 185));
         manager.window()->draw(overlay);
 
-        sf::Text title("You Win", manager.font(), 64);
-        title.setPosition(344.0F, 220.0F);
+        sf::Text title("Level Clear", manager.font(), 64);
+        title.setPosition(300.0F, 220.0F);
         manager.window()->draw(title);
 
-        sf::Text score("Final score: " + std::to_string(manager.world().score()->getCurrentScore()), manager.font(), 32);
-        score.setPosition(340.0F, 330.0F);
+        sf::Text score("Score: " + std::to_string(manager.world().score()->getCurrentScore()), manager.font(), 32);
+        score.setPosition(385.0F, 330.0F);
         manager.window()->draw(score);
 
-        drawButton(*manager.window(), manager.font(), playAgainButtonBounds, "Play again", 294.0F);
+        drawButton(*manager.window(), manager.font(), playAgainButtonBounds, "Next level", 290.0F);
         drawButton(*manager.window(), manager.font(), menuButtonBounds, "Menu", 566.0F);
+    }
+
+private:
+    void startNextLevel()
+    {
+        manager.continueToNextLevel();
     }
 };
 
@@ -306,6 +348,14 @@ void StateManager::transitionTo(StateId stateId)
         currentState = std::make_unique<VictoryState>(*this);
         break;
     }
+}
+
+void StateManager::continueToNextLevel()
+{
+    entityFactory->clearViews();
+    gameWorld.startNextLevel();
+    logic::Stopwatch::instance().reset();
+    currentState = std::make_unique<PlayingState>(*this);
 }
 
 std::shared_ptr<sf::RenderWindow> StateManager::window() const { return renderWindow; }
