@@ -29,6 +29,7 @@ protected:
 
 enum class StateId {
     Menu,
+    Instructions,
     Playing,
     GameOver,
     Victory

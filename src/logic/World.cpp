@@ -10,6 +10,66 @@
 
 namespace bomberman::logic {
 
+namespace {
+
+const std::vector<PowerUpType>& powerUpsForLevel(int level)
+{
+    static const std::vector<PowerUpType> level1{
+        PowerUpType::Fire,
+        PowerUpType::ExtraBomb,
+        PowerUpType::Skates,
+        PowerUpType::Stars,
+    };
+    static const std::vector<PowerUpType> level2{
+        PowerUpType::Fire,
+        PowerUpType::ExtraBomb,
+        PowerUpType::Skates,
+        PowerUpType::Stars,
+        PowerUpType::BlueGhost,
+        PowerUpType::PunchGlove,
+    };
+    static const std::vector<PowerUpType> level3{
+        PowerUpType::Fire,
+        PowerUpType::ExtraBomb,
+        PowerUpType::Skates,
+        PowerUpType::Stars,
+        PowerUpType::BlueGhost,
+        PowerUpType::PunchGlove,
+        PowerUpType::PurpleTear,
+        PowerUpType::RedX,
+    };
+    static const std::vector<PowerUpType> level4{
+        PowerUpType::Fire,
+        PowerUpType::ExtraBomb,
+        PowerUpType::Skates,
+        PowerUpType::Stars,
+        PowerUpType::BlueGhost,
+        PowerUpType::PunchGlove,
+        PowerUpType::PurpleTear,
+        PowerUpType::RedX,
+        PowerUpType::WoodenClogs,
+        PowerUpType::Skull,
+    };
+
+    if (level <= 1) {
+        return level1;
+    }
+    if (level == 2) {
+        return level2;
+    }
+    if (level == 3) {
+        return level3;
+    }
+    return level4;
+}
+
+bool isHarmfulPowerUp(PowerUpType type)
+{
+    return type == PowerUpType::RedX || type == PowerUpType::WoodenClogs || type == PowerUpType::Skull;
+}
+
+} // namespace
+
 World::World(std::shared_ptr<EntityFactory> factory)
     : factory(std::move(factory)), scoreTracker(std::make_shared<Score>("scores.txt"))
 {
@@ -21,12 +81,17 @@ World::World(std::shared_ptr<EntityFactory> factory)
 
 void World::startNewGame()
 {
+    startNewGameAtLevel(1);
+}
+
+void World::startNewGameAtLevel(int level)
+{
     clearArenaEntities();
     entityCounter = 1;
     playerInput = {};
     totalTime = 0.0F;
     remainingPlayerLives = 5;
-    levelNumber = 1;
+    levelNumber = std::clamp(level, 1, maxLevel);
     resetPlayerStats();
     hasWon = false;
 
@@ -37,7 +102,7 @@ void World::startNewGame()
 void World::startNextLevel()
 {
     savePlayerStats();
-    ++levelNumber;
+    levelNumber = std::min(levelNumber + 1, maxLevel);
     clearArenaEntities();
     playerInput = {};
     hasWon = false;
@@ -99,6 +164,11 @@ void World::handlePlayerAction(Action action, bool active)
     case Action::PlaceBomb:
         if (active) {
             placePlayerBomb();
+        }
+        break;
+    case Action::KickBomb:
+        if (active) {
+            kickPlayerBomb();
         }
         break;
     }
@@ -490,7 +560,7 @@ Vec2 World::chooseEnemyInput(Character& enemy)
             continue;
         }
         const auto powerUpType = powerUp->powerUpType();
-        if (powerUpType == PowerUpType::Freeze || powerUpType == PowerUpType::Skull) {
+        if (powerUpType.has_value() && isHarmfulPowerUp(*powerUpType)) {
             continue;
         }
 
@@ -539,6 +609,9 @@ bool World::collidesWithSolid(const Character& character, Vec2 target) const
         if (entity->getType() == EntityType::Bomb && !bombBlocksCharacter(*entity, character)) {
             return false;
         }
+        if (entity->getType() == EntityType::DestructibleBlock && character.canPassSoftBlocks()) {
+            return false;
+        }
         return targetBounds.intersects(entity->getBounds());
     });
 }
@@ -563,6 +636,26 @@ bool World::hasBombAt(int row, int col) const
     return std::any_of(bombsList.begin(), bombsList.end(), [&center](const BombState& state) {
         return state.entity != nullptr && state.entity->isAlive() &&
                state.entity->getBounds().intersects({center, {0.001F, 0.001F}});
+    });
+}
+
+bool World::canBombMoveTo(int row, int col, std::size_t movingBombId) const
+{
+    if (!isInsideArena(row, col)) {
+        return false;
+    }
+
+    const Rect bounds{tileCenter(row, col), {tileDimensions.x * 0.5F, tileDimensions.y * 0.5F}};
+    return std::none_of(entitiesList.begin(), entitiesList.end(), [movingBombId, &bounds](const auto& entity) {
+        if (entity == nullptr || !entity->isAlive() || entity->getId() == movingBombId) {
+            return false;
+        }
+        if (entity->getType() != EntityType::Wall &&
+            entity->getType() != EntityType::DestructibleBlock &&
+            entity->getType() != EntityType::Bomb) {
+            return false;
+        }
+        return entity->getBounds().intersects(bounds);
     });
 }
 
@@ -653,6 +746,7 @@ void World::clearArenaEntities()
     enemyAiStates.clear();
     playerChar.reset();
     levelExit.reset();
+    blueGhostSpawnedThisLevel = false;
 }
 
 void World::applyEnemyLevelBonus(Character& enemy)
@@ -678,6 +772,9 @@ void World::savePlayerStats()
     savedPlayerStats.bombRadius = playerChar->getBombRadius();
     savedPlayerStats.bombCapacity = playerChar->getBombCapacity();
     savedPlayerStats.speed = playerChar->getSpeed();
+    savedPlayerStats.softBlockPass = playerChar->canPassSoftBlocks();
+    savedPlayerStats.canKickBombs = playerChar->canKickBombs();
+    savedPlayerStats.hasRubberBombs = playerChar->hasRubberBombs();
 }
 
 void World::restorePlayerStats()
@@ -689,6 +786,15 @@ void World::restorePlayerStats()
     playerChar->setBombRadius(savedPlayerStats.bombRadius);
     playerChar->setBombCapacity(savedPlayerStats.bombCapacity);
     playerChar->setSpeed(savedPlayerStats.speed);
+    if (savedPlayerStats.softBlockPass) {
+        playerChar->enableSoftBlockPass();
+    }
+    if (savedPlayerStats.canKickBombs) {
+        playerChar->enableBombKick();
+    }
+    if (savedPlayerStats.hasRubberBombs) {
+        playerChar->enableRubberBombs();
+    }
 }
 
 void World::resetPlayerStats()
@@ -791,8 +897,70 @@ void World::placeBombFor(const std::shared_ptr<Character>& character)
     }
 
     auto bomb = factory->createBlock(nextId(), EntityType::Bomb, tileCenter(row, col), tileDimensions);
-    bombsList.push_back({bomb, character, 2.0F, character->getBombRadius(), false});
+    bombsList.push_back({bomb, character, 2.0F, character->getBombRadius(), false, false, {}, row, col, false});
     entitiesList.push_back(bomb);
+}
+
+void World::kickPlayerBomb()
+{
+    if (playerChar == nullptr || !playerChar->isAlive() || !playerChar->canKickBombs()) {
+        return;
+    }
+
+    const auto [playerRow, playerCol] = tileForPosition(playerChar->getPosition());
+    int rowStep = 0;
+    int colStep = 0;
+    switch (playerChar->getDirection()) {
+    case Direction::Down:
+        rowStep = 1;
+        break;
+    case Direction::Left:
+        colStep = -1;
+        break;
+    case Direction::Right:
+        colStep = 1;
+        break;
+    case Direction::Up:
+        rowStep = -1;
+        break;
+    }
+
+    const int bombRow = playerRow + rowStep;
+    const int bombCol = playerCol + colStep;
+    const auto found = std::find_if(bombsList.begin(), bombsList.end(), [this, bombRow, bombCol](const BombState& bomb) {
+        if (bomb.exploded || bomb.entity == nullptr || !bomb.entity->isAlive()) {
+            return false;
+        }
+        const auto [row, col] = tileForPosition(bomb.entity->getPosition());
+        return row == bombRow && col == bombCol;
+    });
+
+    if (found == bombsList.end() || found->entity == nullptr) {
+        return;
+    }
+
+    const int targetRow = bombRow + rowStep;
+    const int targetCol = bombCol + colStep;
+    if (!canBombMoveTo(targetRow, targetCol, found->entity->getId())) {
+        if (!playerChar->hasRubberBombs()) {
+            return;
+        }
+
+        const int bounceRow = bombRow - rowStep;
+        const int bounceCol = bombCol - colStep;
+        if (!canBombMoveTo(bounceRow, bounceCol, found->entity->getId())) {
+            return;
+        }
+
+        rowStep = -rowStep;
+        colStep = -colStep;
+    }
+
+    found->blocksOwner = true;
+    found->moveDirection = {static_cast<float>(colStep), static_cast<float>(rowStep)};
+    found->targetRow = bombRow + rowStep;
+    found->targetCol = bombCol + colStep;
+    found->rubberBounce = playerChar->hasRubberBombs();
 }
 
 void World::updateEnemies(float deltaTime)
@@ -1006,9 +1174,21 @@ void World::createRandomPowerUp(int row, int col)
         return;
     }
 
-    const int unlockedTypes = std::min(6, 3 + levelNumber - 1);
-    const int typeIndex = Random::instance().getRandomInt(0, unlockedTypes - 1);
-    const auto type = static_cast<PowerUpType>(typeIndex);
+    const auto& availableTypes = powerUpsForLevel(levelNumber);
+    std::vector<PowerUpType> spawnPool{};
+    std::copy_if(availableTypes.begin(), availableTypes.end(), std::back_inserter(spawnPool), [this](PowerUpType type) {
+        return type != PowerUpType::BlueGhost || !blueGhostSpawnedThisLevel;
+    });
+
+    if (spawnPool.empty()) {
+        return;
+    }
+
+    const int typeIndex = Random::instance().getRandomInt(0, static_cast<int>(spawnPool.size()) - 1);
+    const auto type = spawnPool[static_cast<std::size_t>(typeIndex)];
+    if (type == PowerUpType::BlueGhost) {
+        blueGhostSpawnedThisLevel = true;
+    }
     const Vec2 size{tileDimensions.x * 0.58F, tileDimensions.y * 0.58F};
     auto powerUp = factory->createPowerUp(nextId(), tileCenter(row, col), size, type);
     powerUpsList.push_back(powerUp);
@@ -1042,10 +1222,9 @@ void World::collectPowerUps(Character& character)
 
         applyPowerUp(character, *powerUpType);
         powerUp->killEntity();
-        if (character.getType() == EntityType::Player &&
-            *powerUpType != PowerUpType::Freeze &&
-            *powerUpType != PowerUpType::Skull) {
-            scoreTracker->onNotify({EventType::PowerUpCollected, powerUp->getId(), 100});
+        if (character.getType() == EntityType::Player) {
+            const int points = *powerUpType == PowerUpType::Stars ? 250 : 100;
+            scoreTracker->onNotify({EventType::PowerUpCollected, powerUp->getId(), points});
         }
     }
 }
@@ -1071,21 +1250,40 @@ void World::applyPowerUp(Character& character, PowerUpType type)
             savePlayerStats();
         }
         break;
-    case PowerUpType::Freeze:
-        character.freeze(2.5F);
+    case PowerUpType::Stars:
+        break;
+    case PowerUpType::BlueGhost:
+        character.enableSoftBlockPass();
+        if (character.getType() == EntityType::Player) {
+            savePlayerStats();
+        }
+        break;
+    case PowerUpType::PunchGlove:
+        character.enableBombKick();
+        if (character.getType() == EntityType::Player) {
+            savePlayerStats();
+        }
+        break;
+    case PowerUpType::PurpleTear:
+        character.enableRubberBombs();
+        if (character.getType() == EntityType::Player) {
+            savePlayerStats();
+        }
+        break;
+    case PowerUpType::RedX:
+        character.disableBombs(5.0F);
+        break;
+    case PowerUpType::WoodenClogs:
+        character.reduceMovementSpeed(0.12F);
+        if (character.getType() == EntityType::Player) {
+            savePlayerStats();
+        }
         break;
     case PowerUpType::Skull:
         if (character.getType() == EntityType::Player) {
             damagePlayer();
         } else {
             character.killEntity();
-        }
-        break;
-    case PowerUpType::Heart:
-        if (character.getType() == EntityType::Player) {
-            ++remainingPlayerLives;
-        } else {
-            character.increaseMaxBombs();
         }
         break;
     }
@@ -1097,6 +1295,8 @@ void World::updateBombs(float deltaTime)
         if (bomb.exploded || bomb.entity == nullptr || !bomb.entity->isAlive()) {
             continue;
         }
+
+        updateMovingBomb(bomb, deltaTime);
 
         const auto owner = bomb.owner.lock();
         if (owner == nullptr || !owner->getBounds().intersects(bomb.entity->getBounds())) {
@@ -1130,6 +1330,51 @@ void World::updateBombs(float deltaTime)
                                               !bomb.entity->isAlive();
                                    }),
                     bombsList.end());
+}
+
+void World::updateMovingBomb(BombState& bomb, float deltaTime)
+{
+    if (bomb.entity == nullptr || (bomb.moveDirection.x == 0.0F && bomb.moveDirection.y == 0.0F)) {
+        return;
+    }
+
+    static constexpr float movingBombSpeed = 1.55F;
+    const Vec2 target = tileCenter(bomb.targetRow, bomb.targetCol);
+    Vec2 position = bomb.entity->getPosition();
+    const float dx = target.x - position.x;
+    const float dy = target.y - position.y;
+    const float distance = std::sqrt(dx * dx + dy * dy);
+    const float step = movingBombSpeed * deltaTime;
+
+    if (distance <= step || distance <= 0.0001F) {
+        bomb.entity->setPosition(target);
+
+        const int rowStep = static_cast<int>(bomb.moveDirection.y);
+        const int colStep = static_cast<int>(bomb.moveDirection.x);
+        const int nextRow = bomb.targetRow + rowStep;
+        const int nextCol = bomb.targetCol + colStep;
+        if (canBombMoveTo(nextRow, nextCol, bomb.entity->getId())) {
+            bomb.targetRow = nextRow;
+            bomb.targetCol = nextCol;
+        } else if (bomb.rubberBounce) {
+            const int bounceRow = bomb.targetRow - rowStep;
+            const int bounceCol = bomb.targetCol - colStep;
+            if (canBombMoveTo(bounceRow, bounceCol, bomb.entity->getId())) {
+                bomb.moveDirection = {-bomb.moveDirection.x, -bomb.moveDirection.y};
+                bomb.targetRow = bounceRow;
+                bomb.targetCol = bounceCol;
+            } else {
+                bomb.moveDirection = {};
+            }
+        } else {
+            bomb.moveDirection = {};
+        }
+        return;
+    }
+
+    position.x += dx / distance * step;
+    position.y += dy / distance * step;
+    bomb.entity->setPosition(position);
 }
 
 void World::updateExplosions(float deltaTime)
@@ -1269,7 +1514,7 @@ void World::damagePlayer()
 
     playerInput = {};
     resetPlayerStats();
-    restorePlayerStats();
+    playerChar->resetPowerUps();
     playerChar->setPosition(tileCenter(1, 1));
 }
 

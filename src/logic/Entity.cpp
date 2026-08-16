@@ -79,14 +79,53 @@ void Character::boostMovementSpeed(float amount)
     moveSpeed += amount;
 }
 
+void Character::reduceMovementSpeed(float amount)
+{
+    moveSpeed = std::max(0.1F, moveSpeed - amount);
+}
+
 void Character::freeze(float seconds)
 {
     freezeTimer = std::max(freezeTimer, seconds);
 }
 
+void Character::disableBombs(float seconds)
+{
+    noBombTimer = std::max(noBombTimer, seconds);
+}
+
 void Character::updateStatus(float deltaTime)
 {
     freezeTimer = std::max(0.0F, freezeTimer - deltaTime);
+    noBombTimer = std::max(0.0F, noBombTimer - deltaTime);
+}
+
+void Character::enableSoftBlockPass()
+{
+    softBlockPass = true;
+}
+
+void Character::enableBombKick()
+{
+    bombKick = true;
+}
+
+void Character::enableRubberBombs()
+{
+    rubberBombs = true;
+}
+
+void Character::resetPowerUps()
+{
+    moveSpeed = 0.5F;
+    freezeTimer = 0.0F;
+    noBombTimer = 0.0F;
+    explosionRadius = 1;
+    maxBombs = 1;
+    activeBombs = std::min(activeBombs, maxBombs);
+    softBlockPass = false;
+    bombKick = false;
+    rubberBombs = false;
 }
 
 std::optional<Direction> Character::facingDirection() const
@@ -131,6 +170,9 @@ void Character::increaseMaxBombs()
 
 bool Character::tryPlaceBomb()
 {
+    if (noBombTimer > 0.0F) {
+        return false;
+    }
     if (activeBombs >= maxBombs) {
         return false;
     }

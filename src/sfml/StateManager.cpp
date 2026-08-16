@@ -13,7 +13,9 @@ namespace bomberman::sfml {
 
 namespace {
 
-const sf::FloatRect playButtonBounds{380.0F, 620.0F, 200.0F, 64.0F};
+const sf::FloatRect playButtonBounds{260.0F, 620.0F, 200.0F, 64.0F};
+const sf::FloatRect instructionsButtonBounds{500.0F, 620.0F, 200.0F, 64.0F};
+const sf::FloatRect instructionsBackButtonBounds{380.0F, 754.0F, 200.0F, 54.0F};
 const sf::FloatRect playAgainButtonBounds{260.0F, 620.0F, 200.0F, 64.0F};
 const sf::FloatRect menuButtonBounds{500.0F, 620.0F, 200.0F, 64.0F};
 
@@ -76,6 +78,8 @@ public:
                                            static_cast<float>(event.mouseButton.y));
             if (playButtonBounds.contains(mouse)) {
                 manager.transitionTo(StateId::Playing);
+            } else if (instructionsButtonBounds.contains(mouse)) {
+                manager.transitionTo(StateId::Instructions);
             }
         }
 
@@ -104,7 +108,68 @@ public:
             manager.window()->draw(row);
         }
 
-        drawButton(*manager.window(), manager.font(), playButtonBounds, "Play", 450.0F);
+        drawButton(*manager.window(), manager.font(), playButtonBounds, "Play", 330.0F);
+        drawButton(*manager.window(), manager.font(), instructionsButtonBounds, "Instructions", 518.0F);
+    }
+};
+
+class InstructionsState final : public State {
+public:
+    using State::State;
+
+    void processEvent(const sf::Event& event) override
+    {
+        if (event.type == sf::Event::MouseButtonPressed) {
+            const auto mouse = sf::Vector2f(static_cast<float>(event.mouseButton.x),
+                                           static_cast<float>(event.mouseButton.y));
+            if (instructionsBackButtonBounds.contains(mouse)) {
+                manager.transitionTo(StateId::Menu);
+            }
+        }
+
+        if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) {
+            manager.transitionTo(StateId::Menu);
+        }
+    }
+
+    void update(float) override {}
+
+    void render() override
+    {
+        sf::Text title("Instructions", manager.font(), 54);
+        title.setPosition(312.0F, 54.0F);
+        manager.window()->draw(title);
+
+        drawText("Goal", 60.0F, 135.0F, 28);
+        drawText("Destroy soft blocks, defeat all enemies, then enter the exit that appears.", 60.0F, 174.0F, 22);
+        drawText("There are 4 levels. Power-ups unlock gradually and remain available in later levels.", 60.0F, 204.0F, 22);
+
+        drawText("Controls", 60.0F, 260.0F, 28);
+        drawText("Move: Arrow keys or WASD", 60.0F, 300.0F, 22);
+        drawText("Place bomb: Space", 60.0F, 330.0F, 22);
+        drawText("Kick bomb after Punch Glove: K", 60.0F, 360.0F, 22);
+        drawText("Pause/resume: Enter    Return to menu while paused: Esc", 60.0F, 390.0F, 22);
+
+        drawText("Power-ups and Downs", 60.0F, 446.0F, 28);
+        drawText("Fire: explosion range +1    Bomb: bomb capacity +1    Skates: speed up", 60.0F, 486.0F, 21);
+        drawText("Stars: bonus points    Blue Ghost: pass through soft blocks, once per level", 60.0F, 516.0F, 21);
+        drawText("Punch Glove: enables K bomb kick    Purple Tear: kicked bombs bounce", 60.0F, 546.0F, 21);
+        drawText("Bomb with Red X: temporarily blocks bomb placement", 60.0F, 576.0F, 21);
+        drawText("Wooden Clogs: speed down    Skull: harmful random curse/power-down", 60.0F, 606.0F, 21);
+
+        drawText("Level Items", 60.0F, 662.0F, 28);
+        drawText("L1: Fire, Bomb, Skates, Stars    L2: + Blue Ghost, Punch Glove", 60.0F, 702.0F, 21);
+        drawText("L3: + Purple Tear, Red X    L4: + Wooden Clogs, Skull", 60.0F, 732.0F, 21);
+
+        drawButton(*manager.window(), manager.font(), instructionsBackButtonBounds, "Back", 448.0F);
+    }
+
+private:
+    void drawText(const std::string& value, float x, float y, unsigned int size)
+    {
+        sf::Text text(value, manager.font(), size);
+        text.setPosition(x, y);
+        manager.window()->draw(text);
     }
 };
 
@@ -128,6 +193,10 @@ public:
 
         if (!paused && event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space) {
             manager.world().handlePlayerAction(logic::Action::PlaceBomb, true);
+        }
+
+        if (!paused && event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::K) {
+            manager.world().handlePlayerAction(logic::Action::KickBomb, true);
         }
     }
 
@@ -257,14 +326,14 @@ public:
             const auto mouse = sf::Vector2f(static_cast<float>(event.mouseButton.x),
                                            static_cast<float>(event.mouseButton.y));
             if (playAgainButtonBounds.contains(mouse)) {
-                startNextLevel();
+                continueAfterVictory();
             } else if (menuButtonBounds.contains(mouse)) {
                 manager.transitionTo(StateId::Menu);
             }
         }
 
         if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Enter) {
-            startNextLevel();
+            continueAfterVictory();
         }
     }
 
@@ -279,21 +348,29 @@ public:
         overlay.setFillColor(sf::Color(12, 24, 20, 185));
         manager.window()->draw(overlay);
 
-        sf::Text title("Level Clear", manager.font(), 64);
-        title.setPosition(300.0F, 220.0F);
+        const bool finalLevel = manager.world().finalLevelComplete();
+        sf::Text title(finalLevel ? "Game Complete" : "Level Clear", manager.font(), 64);
+        title.setPosition(finalLevel ? 252.0F : 300.0F, 220.0F);
         manager.window()->draw(title);
 
-        sf::Text score("Score: " + std::to_string(manager.world().score()->getCurrentScore()), manager.font(), 32);
-        score.setPosition(385.0F, 330.0F);
+        sf::Text score((finalLevel ? "Final score: " : "Score: ") +
+                           std::to_string(manager.world().score()->getCurrentScore()),
+                       manager.font(),
+                       32);
+        score.setPosition(finalLevel ? 340.0F : 385.0F, 330.0F);
         manager.window()->draw(score);
 
-        drawButton(*manager.window(), manager.font(), playAgainButtonBounds, "Next level", 290.0F);
+        drawButton(*manager.window(), manager.font(), playAgainButtonBounds, finalLevel ? "Play again" : "Next level", finalLevel ? 294.0F : 290.0F);
         drawButton(*manager.window(), manager.font(), menuButtonBounds, "Menu", 566.0F);
     }
 
 private:
-    void startNextLevel()
+    void continueAfterVictory()
     {
+        if (manager.world().finalLevelComplete()) {
+            manager.transitionTo(StateId::Playing);
+            return;
+        }
         manager.continueToNextLevel();
     }
 };
@@ -334,6 +411,9 @@ void StateManager::transitionTo(StateId stateId)
     switch (stateId) {
     case StateId::Menu:
         currentState = std::make_unique<MenuState>(*this);
+        break;
+    case StateId::Instructions:
+        currentState = std::make_unique<InstructionsState>(*this);
         break;
     case StateId::Playing:
         entityFactory->clearViews();

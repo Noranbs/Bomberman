@@ -205,7 +205,7 @@ void SpriteView::configureSprite()
         if (const auto powerUpType = targetEntity->powerUpType(); powerUpType.has_value()) {
             switch (*powerUpType) {
             case logic::PowerUpType::Fire:
-                sprite.setTextureRect(sf::IntRect(128, 712, 24, 24));
+                sprite.setTextureRect(sf::IntRect(0, 712, 24, 24));
                 break;
             case logic::PowerUpType::ExtraBomb:
                 sprite.setTextureRect(sf::IntRect(32, 712, 24, 24));
@@ -213,14 +213,26 @@ void SpriteView::configureSprite()
             case logic::PowerUpType::Skates:
                 sprite.setTextureRect(sf::IntRect(64, 712, 24, 24));
                 break;
-            case logic::PowerUpType::Freeze:
+            case logic::PowerUpType::Stars:
+                sprite.setTextureRect(sf::IntRect(128, 712, 24, 24));
+                break;
+            case logic::PowerUpType::BlueGhost:
                 sprite.setTextureRect(sf::IntRect(64, 768, 24, 24));
                 break;
-            case logic::PowerUpType::Skull:
-                sprite.setTextureRect(sf::IntRect(0, 768, 24, 24));
+            case logic::PowerUpType::PunchGlove:
+                sprite.setTextureRect(sf::IntRect(64, 740, 24, 24));
                 break;
-            case logic::PowerUpType::Heart:
-                sprite.setTextureRect(sf::IntRect(96, 704, 24, 24));
+            case logic::PowerUpType::PurpleTear:
+                sprite.setTextureRect(sf::IntRect(96, 712, 24, 24));
+                break;
+            case logic::PowerUpType::RedX:
+                sprite.setTextureRect(sf::IntRect(96, 768, 24, 24));
+                break;
+            case logic::PowerUpType::WoodenClogs:
+                sprite.setTextureRect(sf::IntRect(0, 740, 24, 24));
+                break;
+            case logic::PowerUpType::Skull:
+                sprite.setTextureRect(sf::IntRect(128, 768, 24, 24));
                 break;
             }
         }

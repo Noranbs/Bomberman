@@ -17,7 +17,8 @@ enum class Action {
     MoveDown,
     StopHorizontal,
     StopVertical,
-    PlaceBomb
+    PlaceBomb,
+    KickBomb
 };
 
 class World final {
@@ -25,6 +26,7 @@ public:
     explicit World(std::shared_ptr<EntityFactory> factory);
 
     void startNewGame();
+    void startNewGameAtLevel(int level);
     void startNextLevel();
     void update(float deltaTime);
     void handlePlayerAction(Action action, bool active);
@@ -38,10 +40,13 @@ public:
     float elapsedTime() const { return totalTime; }
     int playerLives() const { return remainingPlayerLives; }
     int currentLevel() const { return levelNumber; }
+    bool finalLevelComplete() const { return hasWon && levelNumber >= maxLevel; }
     int enemiesAlive() const;
     bool playerWon() const { return hasWon; }
 
 private:
+    static constexpr int maxLevel{4};
+
     struct BombState {
         std::shared_ptr<Block> entity{};
         std::weak_ptr<Character> owner{};
@@ -49,6 +54,10 @@ private:
         int radius{1};
         bool blocksOwner{false};
         bool exploded{false};
+        Vec2 moveDirection{};
+        int targetRow{0};
+        int targetCol{0};
+        bool rubberBounce{false};
     };
 
     struct ExplosionState {
@@ -75,6 +84,9 @@ private:
         int bombRadius{1};
         int bombCapacity{1};
         float speed{0.5F};
+        bool softBlockPass{false};
+        bool canKickBombs{false};
+        bool hasRubberBombs{false};
     };
 
     std::size_t nextId();
@@ -105,6 +117,7 @@ private:
     [[nodiscard]] bool collidesWithSolid(const Character& character, Vec2 target) const;
     [[nodiscard]] bool bombBlocksCharacter(const Entity& bomb, const Character& character) const;
     [[nodiscard]] bool hasBombAt(int row, int col) const;
+    [[nodiscard]] bool canBombMoveTo(int row, int col, std::size_t movingBombId) const;
     [[nodiscard]] bool hasAdjacentDestructibleBlock(int row, int col) const;
     [[nodiscard]] bool levelObjectivesComplete() const;
 
@@ -120,6 +133,8 @@ private:
     void moveCharacter(Character& character, Vec2 velocity, float deltaTime);
     void placePlayerBomb();
     void placeBombFor(const std::shared_ptr<Character>& character);
+    void kickPlayerBomb();
+    void updateMovingBomb(BombState& bomb, float deltaTime);
     void updateEnemies(float deltaTime);
     void moveEnemyTowardTarget(Character& enemy, EnemyAiState& ai, float deltaTime);
     void createRandomPowerUp(int row, int col);
@@ -154,6 +169,7 @@ private:
     int levelNumber{1};
     PlayerStats savedPlayerStats{};
     bool hasWon{false};
+    bool blueGhostSpawnedThisLevel{false};
 };
 
 }
