@@ -41,7 +41,7 @@ void SpriteView::onNotify(const logic::Event& event)
             }
         }
         syncTransform();
-    } else if (event.type == logic::EventType::EntityDied) {
+    } else if (event.type == logic::EventType::EntityDied || event.type == logic::EventType::PlayerDamaged) {
         const auto targetEntity = entity.lock();
         if (targetEntity != nullptr &&
             (targetEntity->getType() == logic::EntityType::Player || targetEntity->getType() == logic::EntityType::Enemy)) {
@@ -259,6 +259,7 @@ void SpriteView::updateAnimation()
 
     mirrored = false;
     visualScale = 1.0F;
+    sprite.setRotation(0.0F);
     sprite.setColor(sf::Color::White);
 
     const float seconds = animationSeconds();
@@ -299,8 +300,10 @@ void SpriteView::updateAnimation()
         if (deathAnimationActive) {
             const auto elapsed = std::chrono::steady_clock::now() - deathStart;
             const float progress = std::chrono::duration<float>(elapsed).count() / 0.65F;
-            const auto alpha = static_cast<sf::Uint8>(255.0F * (1.0F - std::min(progress, 1.0F)));
-            visualScale = 1.0F + progress * 0.35F;
+            const float clampedProgress = std::min(progress, 1.0F);
+            const auto alpha = static_cast<sf::Uint8>(255.0F * (1.0F - clampedProgress * 0.75F));
+            visualScale = 1.0F + std::sin(clampedProgress * 3.14159F) * 0.45F;
+            sprite.setRotation(std::sin(clampedProgress * 3.14159F * 2.0F) * 18.0F);
             sprite.setColor(targetEntity->getType() == logic::EntityType::Enemy
                                 ? sf::Color(255, 115, 115, alpha)
                                 : sf::Color(255, 255, 255, alpha));

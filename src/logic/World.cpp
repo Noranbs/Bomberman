@@ -1515,6 +1515,7 @@ void World::damagePlayer()
     playerInput = {};
     resetPlayerStats();
     playerChar->resetPowerUps();
+    playerChar->notify({EventType::PlayerDamaged, playerChar->getId(), remainingPlayerLives});
     playerChar->setPosition(tileCenter(1, 1));
 }
 

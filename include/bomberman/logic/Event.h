@@ -11,6 +11,7 @@ enum class EventType {
     BlockDestroyed,
     PowerUpCollected,
     EnemyKilled,
+    PlayerDamaged,
     PlayerWon,
     PlayerLost,
     Tick

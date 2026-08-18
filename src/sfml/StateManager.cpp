@@ -4,6 +4,9 @@
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Window/Keyboard.hpp>
 
+#include <array>
+#include <chrono>
+#include <cmath>
 #include <iomanip>
 #include <sstream>
 #include <string>
@@ -86,6 +89,7 @@ public:
         if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Enter) {
             manager.transitionTo(StateId::Playing);
         }
+
     }
 
     void update(float) override {}
@@ -343,14 +347,20 @@ public:
     {
         manager.factory()->drawViews();
         renderHud(manager);
+        const float seconds = animationSeconds();
 
         sf::RectangleShape overlay({960.0F, 832.0F});
-        overlay.setFillColor(sf::Color(12, 24, 20, 185));
+        const auto overlayAlpha = static_cast<sf::Uint8>(170.0F + std::sin(seconds * 3.0F) * 18.0F);
+        overlay.setFillColor(sf::Color(12, 24, 20, overlayAlpha));
         manager.window()->draw(overlay);
+
+        renderCelebration(seconds);
 
         const bool finalLevel = manager.world().finalLevelComplete();
         sf::Text title(finalLevel ? "Game Complete" : "Level Clear", manager.font(), 64);
         title.setPosition(finalLevel ? 252.0F : 300.0F, 220.0F);
+        const float titlePulse = 1.0F + std::sin(seconds * 5.0F) * 0.04F;
+        title.setScale(titlePulse, titlePulse);
         manager.window()->draw(title);
 
         sf::Text score((finalLevel ? "Final score: " : "Score: ") +
@@ -365,6 +375,40 @@ public:
     }
 
 private:
+    float animationSeconds() const
+    {
+        return std::chrono::duration<float>(std::chrono::steady_clock::now() - animationStart).count();
+    }
+
+    void renderCelebration(float seconds)
+    {
+        static const std::array<sf::Color, 6> colors{
+            sf::Color(255, 212, 76),
+            sf::Color(255, 96, 84),
+            sf::Color(98, 205, 255),
+            sf::Color(116, 230, 132),
+            sf::Color(194, 125, 255),
+            sf::Color(255, 154, 72),
+        };
+
+        for (int index = 0; index < 36; ++index) {
+            const float column = static_cast<float>((index * 73) % 900) + 30.0F;
+            const float phase = static_cast<float>(index % 9) * 0.47F;
+            const float y = std::fmod(seconds * (72.0F + static_cast<float>(index % 5) * 14.0F) +
+                                          static_cast<float>((index * 41) % 760),
+                                      760.0F) +
+                            44.0F;
+            const float x = column + std::sin(seconds * 2.2F + phase) * 24.0F;
+
+            sf::RectangleShape particle({8.0F, 14.0F});
+            particle.setOrigin(4.0F, 7.0F);
+            particle.setPosition(x, y);
+            particle.setRotation(seconds * 160.0F + static_cast<float>(index * 17));
+            particle.setFillColor(colors[static_cast<std::size_t>(index) % colors.size()]);
+            manager.window()->draw(particle);
+        }
+    }
+
     void continueAfterVictory()
     {
         if (manager.world().finalLevelComplete()) {
@@ -373,6 +417,8 @@ private:
         }
         manager.continueToNextLevel();
     }
+
+    std::chrono::steady_clock::time_point animationStart{std::chrono::steady_clock::now()};
 };
 
 } // namespace
