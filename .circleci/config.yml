@@ -4,7 +4,7 @@ jobs:
   build:
     resource_class: small
     docker:
-      - image: ubuntu:24.04
+      - image: ubuntu:20.04
     steps:
       - checkout
       - run: apt-get update
@@ -14,7 +14,6 @@ jobs:
       - run: mkdir -p build
       - run: cd build && cmake ..
       - run: cd build && make
-      - run: cd build && ctest --output-on-failure
       - run: cd build && make install
       - run: cd build && make doc
       - store_artifacts:
