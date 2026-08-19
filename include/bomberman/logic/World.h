@@ -45,7 +45,7 @@ public:
     bool playerWon() const { return hasWon; }
 
 private:
-    static constexpr int maxLevel{4};
+    static constexpr int maxLevel{3};
 
     struct BombState {
         std::shared_ptr<Block> entity{};
@@ -84,7 +84,6 @@ private:
         int bombRadius{1};
         int bombCapacity{1};
         float speed{0.5F};
-        bool softBlockPass{false};
         bool canKickBombs{false};
         bool hasRubberBombs{false};
     };
@@ -169,7 +168,6 @@ private:
     int levelNumber{1};
     PlayerStats savedPlayerStats{};
     bool hasWon{false};
-    bool blueGhostSpawnedThisLevel{false};
 };
 
 }

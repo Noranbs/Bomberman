@@ -25,25 +25,15 @@ const std::vector<PowerUpType>& powerUpsForLevel(int level)
         PowerUpType::ExtraBomb,
         PowerUpType::Skates,
         PowerUpType::Stars,
-        PowerUpType::BlueGhost,
         PowerUpType::PunchGlove,
+        PowerUpType::PurpleTear,
+        PowerUpType::RedX,
     };
     static const std::vector<PowerUpType> level3{
         PowerUpType::Fire,
         PowerUpType::ExtraBomb,
         PowerUpType::Skates,
         PowerUpType::Stars,
-        PowerUpType::BlueGhost,
-        PowerUpType::PunchGlove,
-        PowerUpType::PurpleTear,
-        PowerUpType::RedX,
-    };
-    static const std::vector<PowerUpType> level4{
-        PowerUpType::Fire,
-        PowerUpType::ExtraBomb,
-        PowerUpType::Skates,
-        PowerUpType::Stars,
-        PowerUpType::BlueGhost,
         PowerUpType::PunchGlove,
         PowerUpType::PurpleTear,
         PowerUpType::RedX,
@@ -57,10 +47,7 @@ const std::vector<PowerUpType>& powerUpsForLevel(int level)
     if (level == 2) {
         return level2;
     }
-    if (level == 3) {
-        return level3;
-    }
-    return level4;
+    return level3;
 }
 
 bool isHarmfulPowerUp(PowerUpType type)
@@ -609,9 +596,6 @@ bool World::collidesWithSolid(const Character& character, Vec2 target) const
         if (entity->getType() == EntityType::Bomb && !bombBlocksCharacter(*entity, character)) {
             return false;
         }
-        if (entity->getType() == EntityType::DestructibleBlock && character.canPassSoftBlocks()) {
-            return false;
-        }
         return targetBounds.intersects(entity->getBounds());
     });
 }
@@ -675,14 +659,6 @@ bool World::hasAdjacentDestructibleBlock(int row, int col) const
 
 bool World::levelObjectivesComplete() const
 {
-    const bool destructibleBlocksRemain = std::any_of(entitiesList.begin(), entitiesList.end(), [](const auto& entity) {
-        return entity != nullptr && entity->isAlive() && entity->getType() == EntityType::DestructibleBlock;
-    });
-
-    const bool powerUpsRemain = std::any_of(powerUpsList.begin(), powerUpsList.end(), [](const auto& powerUp) {
-        return powerUp != nullptr && powerUp->isAlive();
-    });
-
     const bool bombsRemain = std::any_of(bombsList.begin(), bombsList.end(), [](const BombState& bomb) {
         return !bomb.exploded && bomb.entity != nullptr && bomb.entity->isAlive();
     });
@@ -691,7 +667,7 @@ bool World::levelObjectivesComplete() const
         return explosion.entity != nullptr && explosion.entity->isAlive();
     });
 
-    return enemiesAlive() == 0 && !destructibleBlocksRemain && !powerUpsRemain && !bombsRemain && !explosionsRemain;
+    return enemiesAlive() == 0 && !bombsRemain && !explosionsRemain;
 }
 
 void World::createArena()
@@ -746,7 +722,6 @@ void World::clearArenaEntities()
     enemyAiStates.clear();
     playerChar.reset();
     levelExit.reset();
-    blueGhostSpawnedThisLevel = false;
 }
 
 void World::applyEnemyLevelBonus(Character& enemy)
@@ -772,7 +747,6 @@ void World::savePlayerStats()
     savedPlayerStats.bombRadius = playerChar->getBombRadius();
     savedPlayerStats.bombCapacity = playerChar->getBombCapacity();
     savedPlayerStats.speed = playerChar->getSpeed();
-    savedPlayerStats.softBlockPass = playerChar->canPassSoftBlocks();
     savedPlayerStats.canKickBombs = playerChar->canKickBombs();
     savedPlayerStats.hasRubberBombs = playerChar->hasRubberBombs();
 }
@@ -786,9 +760,6 @@ void World::restorePlayerStats()
     playerChar->setBombRadius(savedPlayerStats.bombRadius);
     playerChar->setBombCapacity(savedPlayerStats.bombCapacity);
     playerChar->setSpeed(savedPlayerStats.speed);
-    if (savedPlayerStats.softBlockPass) {
-        playerChar->enableSoftBlockPass();
-    }
     if (savedPlayerStats.canKickBombs) {
         playerChar->enableBombKick();
     }
@@ -820,8 +791,30 @@ void World::updateLevelExit()
 
 void World::createLevelExit()
 {
+    int exitRow = numRows / 2;
+    int exitCol = numCols / 2;
+    int bestDistance = numRows + numCols;
+
+    for (int row = 1; row < numRows - 1; ++row) {
+        for (int col = 1; col < numCols - 1; ++col) {
+            if (tileContains(EntityType::Wall, row, col) ||
+                tileContains(EntityType::DestructibleBlock, row, col) ||
+                tileContains(EntityType::Bomb, row, col) ||
+                tileContains(EntityType::PowerUp, row, col)) {
+                continue;
+            }
+
+            const int distance = std::abs(row - numRows / 2) + std::abs(col - numCols / 2);
+            if (distance < bestDistance) {
+                bestDistance = distance;
+                exitRow = row;
+                exitCol = col;
+            }
+        }
+    }
+
     const Vec2 size{tileDimensions.x * 0.8F, tileDimensions.y * 0.8F};
-    levelExit = factory->createBlock(nextId(), EntityType::Exit, tileCenter(numRows / 2, numCols / 2), size);
+    levelExit = factory->createBlock(nextId(), EntityType::Exit, tileCenter(exitRow, exitCol), size);
     entitiesList.push_back(levelExit);
 }
 
@@ -1175,20 +1168,12 @@ void World::createRandomPowerUp(int row, int col)
     }
 
     const auto& availableTypes = powerUpsForLevel(levelNumber);
-    std::vector<PowerUpType> spawnPool{};
-    std::copy_if(availableTypes.begin(), availableTypes.end(), std::back_inserter(spawnPool), [this](PowerUpType type) {
-        return type != PowerUpType::BlueGhost || !blueGhostSpawnedThisLevel;
-    });
-
-    if (spawnPool.empty()) {
+    if (availableTypes.empty()) {
         return;
     }
 
-    const int typeIndex = Random::instance().getRandomInt(0, static_cast<int>(spawnPool.size()) - 1);
-    const auto type = spawnPool[static_cast<std::size_t>(typeIndex)];
-    if (type == PowerUpType::BlueGhost) {
-        blueGhostSpawnedThisLevel = true;
-    }
+    const int typeIndex = Random::instance().getRandomInt(0, static_cast<int>(availableTypes.size()) - 1);
+    const auto type = availableTypes[static_cast<std::size_t>(typeIndex)];
     const Vec2 size{tileDimensions.x * 0.58F, tileDimensions.y * 0.58F};
     auto powerUp = factory->createPowerUp(nextId(), tileCenter(row, col), size, type);
     powerUpsList.push_back(powerUp);
@@ -1251,12 +1236,6 @@ void World::applyPowerUp(Character& character, PowerUpType type)
         }
         break;
     case PowerUpType::Stars:
-        break;
-    case PowerUpType::BlueGhost:
-        character.enableSoftBlockPass();
-        if (character.getType() == EntityType::Player) {
-            savePlayerStats();
-        }
         break;
     case PowerUpType::PunchGlove:
         character.enableBombKick();
@@ -1489,8 +1468,11 @@ bool World::applyExplosionToTile(int row, int col, bool playerOwnedBomb)
         case EntityType::Wall:
         case EntityType::DestructibleBlock:
         case EntityType::Explosion:
-        case EntityType::PowerUp:
         case EntityType::Exit:
+            break;
+
+        case EntityType::PowerUp:
+            entity->killEntity();
             break;
         }
     }

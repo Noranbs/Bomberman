@@ -34,7 +34,6 @@ enum class PowerUpType {
     ExtraBomb,
     Skates,
     Stars,
-    BlueGhost,
     PunchGlove,
     PurpleTear,
     RedX,
@@ -96,7 +95,6 @@ public:
 
     float getSpeedMultiplier() const { return moveSpeed; }
     bool isFrozen() const { return freezeTimer > 0.0F; }
-    bool canPassSoftBlocks() const { return softBlockPass; }
     bool canKickBombs() const { return bombKick; }
     bool hasRubberBombs() const { return rubberBombs; }
 
@@ -115,7 +113,6 @@ public:
     void freeze(float seconds);
     void disableBombs(float seconds);
     void updateStatus(float deltaTime);
-    void enableSoftBlockPass();
     void enableBombKick();
     void enableRubberBombs();
     void resetPowerUps();
@@ -136,7 +133,6 @@ private:
     int explosionRadius{1};
     int maxBombs{1};
     int activeBombs{0};
-    bool softBlockPass{false};
     bool bombKick{false};
     bool rubberBombs{false};
 };

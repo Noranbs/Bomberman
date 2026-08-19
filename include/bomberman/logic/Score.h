@@ -35,6 +35,7 @@ private:
 
     std::filesystem::path scorePath;
     int currentPoints{0};
+    float pendingSurvivalPoints{0.0F};
     std::vector<ScoreEntry> topScores{};
 };
 

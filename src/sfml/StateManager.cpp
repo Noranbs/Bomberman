@@ -146,7 +146,7 @@ public:
 
         drawText("Goal", 60.0F, 135.0F, 28);
         drawText("Destroy soft blocks, defeat all enemies, then enter the exit that appears.", 60.0F, 174.0F, 22);
-        drawText("There are 4 levels. Power-ups unlock gradually and remain available in later levels.", 60.0F, 204.0F, 22);
+        drawText("There are 3 levels. Power-ups unlock gradually and remain available in later levels.", 60.0F, 204.0F, 22);
 
         drawText("Controls", 60.0F, 260.0F, 28);
         drawText("Move: Arrow keys or WASD", 60.0F, 300.0F, 22);
@@ -156,14 +156,14 @@ public:
 
         drawText("Power-ups and Downs", 60.0F, 446.0F, 28);
         drawText("Fire: explosion range +1    Bomb: bomb capacity +1    Skates: speed up", 60.0F, 486.0F, 21);
-        drawText("Stars: bonus points    Blue Ghost: pass through soft blocks, once per level", 60.0F, 516.0F, 21);
+        drawText("Stars: bonus points", 60.0F, 516.0F, 21);
         drawText("Punch Glove: enables K bomb kick    Purple Tear: kicked bombs bounce", 60.0F, 546.0F, 21);
         drawText("Bomb with Red X: temporarily blocks bomb placement", 60.0F, 576.0F, 21);
         drawText("Wooden Clogs: speed down    Skull: harmful random curse/power-down", 60.0F, 606.0F, 21);
 
         drawText("Level Items", 60.0F, 662.0F, 28);
-        drawText("L1: Fire, Bomb, Skates, Stars    L2: + Blue Ghost, Punch Glove", 60.0F, 702.0F, 21);
-        drawText("L3: + Purple Tear, Red X    L4: + Wooden Clogs, Skull", 60.0F, 732.0F, 21);
+        drawText("L1: Fire, Bomb, Skates, Stars", 60.0F, 702.0F, 21);
+        drawText("L2: + Punch Glove, Purple Tear, Red X    L3: + Wooden Clogs, Skull", 60.0F, 732.0F, 21);
 
         drawButton(*manager.window(), manager.font(), instructionsBackButtonBounds, "Back", 448.0F);
     }

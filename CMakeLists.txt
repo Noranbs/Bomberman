@@ -38,6 +38,19 @@ target_link_libraries(Bomberman_AP
 
 target_compile_options(Bomberman_AP PRIVATE -Wall -Wextra -Wpedantic)
 
+enable_testing()
+
+add_executable(bomberman_logic_tests
+        tests/logic_tests.cpp)
+
+target_link_libraries(bomberman_logic_tests
+        PRIVATE
+        bomberman_logic)
+
+target_compile_options(bomberman_logic_tests PRIVATE -Wall -Wextra -Wpedantic)
+
+add_test(NAME bomberman_logic_tests COMMAND bomberman_logic_tests)
+
 add_custom_command(TARGET Bomberman_AP POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${PROJECT_SOURCE_DIR}/assets

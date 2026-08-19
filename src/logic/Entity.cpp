@@ -100,11 +100,6 @@ void Character::updateStatus(float deltaTime)
     noBombTimer = std::max(0.0F, noBombTimer - deltaTime);
 }
 
-void Character::enableSoftBlockPass()
-{
-    softBlockPass = true;
-}
-
 void Character::enableBombKick()
 {
     bombKick = true;
@@ -123,7 +118,6 @@ void Character::resetPowerUps()
     explosionRadius = 1;
     maxBombs = 1;
     activeBombs = std::min(activeBombs, maxBombs);
-    softBlockPass = false;
     bombKick = false;
     rubberBombs = false;
 }

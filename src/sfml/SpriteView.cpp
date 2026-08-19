@@ -216,9 +216,6 @@ void SpriteView::configureSprite()
             case logic::PowerUpType::Stars:
                 sprite.setTextureRect(sf::IntRect(128, 712, 24, 24));
                 break;
-            case logic::PowerUpType::BlueGhost:
-                sprite.setTextureRect(sf::IntRect(64, 768, 24, 24));
-                break;
             case logic::PowerUpType::PunchGlove:
                 sprite.setTextureRect(sf::IntRect(64, 740, 24, 24));
                 break;

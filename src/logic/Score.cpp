@@ -40,11 +40,19 @@ void Score::onNotify(const Event& event)
 void Score::resetCurrentScore()
 {
     currentPoints = 0;
+    pendingSurvivalPoints = 0.0F;
 }
 
 void Score::addSurvivalTimeScore(float seconds)
 {
-    currentPoints += static_cast<int>(seconds * 2.0F);
+    pendingSurvivalPoints += seconds * 2.0F;
+    const int wholePoints = static_cast<int>(pendingSurvivalPoints);
+    if (wholePoints <= 0) {
+        return;
+    }
+
+    currentPoints += wholePoints;
+    pendingSurvivalPoints -= static_cast<float>(wholePoints);
 }
 
 void Score::load()
