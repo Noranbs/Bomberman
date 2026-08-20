@@ -159,7 +159,7 @@ public:
         drawText("Stars: bonus points", 60.0F, 516.0F, 21);
         drawText("Punch Glove: enables K bomb kick    Purple Tear: kicked bombs bounce", 60.0F, 546.0F, 21);
         drawText("Bomb with Red X: temporarily blocks bomb placement", 60.0F, 576.0F, 21);
-        drawText("Wooden Clogs: speed down    Skull: harmful random curse/power-down", 60.0F, 606.0F, 21);
+        drawText("Wooden Clogs: speed down    Skull: bad item, player loses life", 60.0F, 606.0F, 21);
 
         drawText("Level Items", 60.0F, 662.0F, 28);
         drawText("L1: Fire, Bomb, Skates, Stars", 60.0F, 702.0F, 21);
