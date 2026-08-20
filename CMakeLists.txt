@@ -12,7 +12,10 @@ add_library(bomberman_logic
         src/logic/Random.cpp
         src/logic/Score.cpp
         src/logic/Stopwatch.cpp
-        src/logic/World.cpp)
+        src/logic/World.cpp
+        src/logic/WorldAi.cpp
+        src/logic/WorldBombs.cpp
+        src/logic/WorldPowerUps.cpp)
 
 target_include_directories(bomberman_logic
         PUBLIC

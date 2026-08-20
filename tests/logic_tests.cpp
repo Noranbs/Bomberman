@@ -66,6 +66,7 @@ void testMovementAndBombReuse()
     world.handlePlayerAction(Action::MoveRight, false);
 
     assert(world.player()->getPosition().x > start.x);
+    assert(world.player()->getPosition().x - start.x > 0.09F);
     assert(world.player()->getPosition().x <= 1.0F);
 
     const auto beforeBomb = world.entities().size();

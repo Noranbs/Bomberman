@@ -135,7 +135,6 @@ private:
     [[nodiscard]] bool canEnterTile(const Character& character, int row, int col) const;
     [[nodiscard]] bool isTileDangerous(int row, int col) const;
     [[nodiscard]] bool isTileThreatenedByBomb(int row, int col, int bombRow, int bombCol, int radius) const;
-    [[nodiscard]] bool hasEscapeFromBomb(const Character& character, int bombRow, int bombCol, int radius) const;
     [[nodiscard]] std::optional<Vec2> findEscapeInput(const Character& character,
                                                       int bombRow,
                                                       int bombCol,
