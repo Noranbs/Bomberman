@@ -8,25 +8,33 @@
 
 namespace bomberman::logic {
 
-// Abstract Factory interface for creating game entities (Abstract Factory Pattern)
+/**
+ * @brief Abstract factory used by World to create entities.
+ */
 class EntityFactory {
 public:
     virtual ~EntityFactory() = default;
 
-    // Creates a new character instance (Player or Enemy)
+    /**
+     * @brief Creates a player or enemy character.
+     */
     virtual std::shared_ptr<Character> createCharacter(std::size_t id,
                                                        EntityType type,
                                                        Vec2 position,
                                                        Vec2 size) = 0;
 
-    // Creates a new block instance (Wall, Breakable Block, Bomb, or Explosion tile)
+    /**
+     * @brief Creates a block-like entity, such as a wall, bomb, or explosion.
+     */
     virtual std::shared_ptr<Block> createBlock(std::size_t id,
                                                EntityType type,
                                                Vec2 position,
                                                Vec2 size,
                                                std::optional<ExplosionShape> explosionShape = std::nullopt) = 0;
 
-    // Creates a new pickable power-up item instance
+    /**
+     * @brief Creates a power-up that can be picked up by characters.
+     */
     virtual std::shared_ptr<PowerUp> createPowerUp(std::size_t id,
                                                    Vec2 position,
                                                    Vec2 size,

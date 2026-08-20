@@ -10,25 +10,61 @@
 
 namespace bomberman::logic {
 
+/**
+ * @brief Player actions that the representation layer can send to the world.
+ */
 enum class Action {
-    MoveLeft,
-    MoveRight,
-    MoveUp,
-    MoveDown,
-    StopHorizontal,
-    StopVertical,
-    PlaceBomb,
-    KickBomb
+    MoveLeft,       ///< Start moving left.
+    MoveRight,      ///< Start moving right.
+    MoveUp,         ///< Start moving up.
+    MoveDown,       ///< Start moving down.
+    StopHorizontal, ///< Stop horizontal movement.
+    StopVertical,   ///< Stop vertical movement.
+    PlaceBomb,      ///< Place a bomb.
+    KickBomb        ///< Kick an adjacent bomb.
 };
 
+/**
+ * @brief Main logic class that owns the arena and updates the game rules.
+ *
+ * World does not use SFML. It moves characters, places bombs, checks
+ * collisions, updates enemies, creates power-ups, and decides when a level is won.
+ */
 class World final {
 public:
+    /**
+     * @brief Creates a world that uses the given entity factory.
+     * @param factory Factory used to create all entities.
+     */
     explicit World(std::shared_ptr<EntityFactory> factory);
 
+    /**
+     * @brief Starts a new game from level 1.
+     */
     void startNewGame();
+
+    /**
+     * @brief Starts a new game at a specific level.
+     * @param level Level number to start from.
+     */
     void startNewGameAtLevel(int level);
+
+    /**
+     * @brief Starts the next level and keeps saved player upgrades.
+     */
     void startNextLevel();
+
+    /**
+     * @brief Updates the complete game logic.
+     * @param deltaTime Time since the last update.
+     */
     void update(float deltaTime);
+
+    /**
+     * @brief Handles player input translated by the SFML layer.
+     * @param action Action to apply.
+     * @param active True when the action starts or is held.
+     */
     void handlePlayerAction(Action action, bool active);
 
     const std::vector<std::shared_ptr<Entity>>& entities() const { return entitiesList; }
@@ -41,6 +77,9 @@ public:
     int playerLives() const { return remainingPlayerLives; }
     int currentLevel() const { return levelNumber; }
     bool finalLevelComplete() const { return hasWon && levelNumber >= maxLevel; }
+    /**
+     * @brief Returns the number of enemies that are still alive.
+     */
     int enemiesAlive() const;
     bool playerWon() const { return hasWon; }
 
@@ -48,44 +87,44 @@ private:
     static constexpr int maxLevel{3};
 
     struct BombState {
-        std::shared_ptr<Block> entity{};
-        std::weak_ptr<Character> owner{};
-        float timer{2.0F};
-        int radius{1};
-        bool blocksOwner{false};
-        bool exploded{false};
-        Vec2 moveDirection{};
-        int targetRow{0};
-        int targetCol{0};
-        bool rubberBounce{false};
+        std::shared_ptr<Block> entity{};  ///< Bomb entity in the world.
+        std::weak_ptr<Character> owner{}; ///< Character that placed the bomb.
+        float timer{2.0F};                ///< Seconds until explosion.
+        int radius{1};                    ///< Explosion radius in tiles.
+        bool blocksOwner{false};          ///< True after the owner leaves the bomb.
+        bool exploded{false};             ///< True when the bomb already exploded.
+        Vec2 moveDirection{};             ///< Direction for a kicked bomb.
+        int targetRow{0};                 ///< Tile row a moving bomb is going to.
+        int targetCol{0};                 ///< Tile column a moving bomb is going to.
+        bool rubberBounce{false};         ///< True if this bomb bounces when blocked.
     };
 
     struct ExplosionState {
-        std::shared_ptr<Block> entity{};
-        float timer{0.65F};
+        std::shared_ptr<Block> entity{}; ///< Explosion entity in the world.
+        float timer{0.65F};              ///< Seconds before the explosion disappears.
     };
 
     struct EnemyAiState {
-        std::weak_ptr<Character> enemy{};
-        Vec2 input{};
-        float decisionTimer{0.0F};
-        float bombCooldown{0.0F};
-        bool escapingOwnBomb{false};
-        int escapeBombRow{0};
-        int escapeBombCol{0};
-        int escapeBombRadius{1};
-        bool hasTarget{false};
-        int targetRow{0};
-        int targetCol{0};
-        std::vector<Vec2> escapePath{};
+        std::weak_ptr<Character> enemy{}; ///< Enemy controlled by this AI state.
+        Vec2 input{};                     ///< Current movement input.
+        float decisionTimer{0.0F};        ///< Time until the next AI decision.
+        float bombCooldown{0.0F};         ///< Time before this enemy may place another bomb.
+        bool escapingOwnBomb{false};      ///< True while running away from its own bomb.
+        int escapeBombRow{0};             ///< Row of the bomb to escape from.
+        int escapeBombCol{0};             ///< Column of the bomb to escape from.
+        int escapeBombRadius{1};          ///< Radius of the bomb to escape from.
+        bool hasTarget{false};            ///< True if the enemy is moving to a target tile.
+        int targetRow{0};                 ///< Target tile row.
+        int targetCol{0};                 ///< Target tile column.
+        std::vector<Vec2> escapePath{};   ///< Planned escape movement steps.
     };
 
     struct PlayerStats {
-        int bombRadius{1};
-        int bombCapacity{1};
-        float speed{0.5F};
-        bool canKickBombs{false};
-        bool hasRubberBombs{false};
+        int bombRadius{1};          ///< Saved bomb radius.
+        int bombCapacity{1};        ///< Saved bomb capacity.
+        float speed{0.5F};          ///< Saved movement speed.
+        bool canKickBombs{false};   ///< Saved bomb-kick upgrade.
+        bool hasRubberBombs{false}; ///< Saved rubber-bomb upgrade.
     };
 
     std::size_t nextId();
@@ -148,26 +187,26 @@ private:
     void damagePlayer();
     void removeDeadTransientEntities();
 
-    std::shared_ptr<EntityFactory> factory;
-    std::shared_ptr<Score> scoreTracker;
-    std::vector<std::shared_ptr<Entity>> entitiesList{};
-    std::shared_ptr<Character> playerChar{};
-    std::vector<std::shared_ptr<Character>> enemiesList{};
-    std::vector<BombState> bombsList{};
-    std::vector<ExplosionState> explosionsList{};
-    std::vector<std::shared_ptr<PowerUp>> powerUpsList{};
-    std::shared_ptr<Block> levelExit{};
-    std::vector<EnemyAiState> enemyAiStates{};
-    std::size_t entityCounter{1};
-    int numRows{13};
-    int numCols{15};
-    Vec2 tileDimensions{};
-    Vec2 playerInput{};
-    float totalTime{0.0F};
-    int remainingPlayerLives{5};
-    int levelNumber{1};
-    PlayerStats savedPlayerStats{};
-    bool hasWon{false};
+    std::shared_ptr<EntityFactory> factory;              ///< Factory used to create entities.
+    std::shared_ptr<Score> scoreTracker;                 ///< Score manager for the game.
+    std::vector<std::shared_ptr<Entity>> entitiesList{}; ///< All entities in the arena.
+    std::shared_ptr<Character> playerChar{};             ///< Player character.
+    std::vector<std::shared_ptr<Character>> enemiesList{}; ///< Enemy characters.
+    std::vector<BombState> bombsList{};                  ///< Active bombs.
+    std::vector<ExplosionState> explosionsList{};        ///< Active explosions.
+    std::vector<std::shared_ptr<PowerUp>> powerUpsList{}; ///< Active power-ups.
+    std::shared_ptr<Block> levelExit{};                  ///< Exit entity after enemies are defeated.
+    std::vector<EnemyAiState> enemyAiStates{};           ///< AI state for each enemy.
+    std::size_t entityCounter{1};                        ///< Counter used for unique ids.
+    int numRows{13};                                     ///< Arena row count.
+    int numCols{15};                                     ///< Arena column count.
+    Vec2 tileDimensions{};                               ///< Size of one tile in world coordinates.
+    Vec2 playerInput{};                                  ///< Current player movement input.
+    float totalTime{0.0F};                               ///< Time alive in the current game.
+    int remainingPlayerLives{5};                         ///< Player lives left.
+    int levelNumber{1};                                  ///< Current level number.
+    PlayerStats savedPlayerStats{};                      ///< Player upgrades kept between levels.
+    bool hasWon{false};                                  ///< True after reaching the level exit.
 };
 
 }
