@@ -1,5 +1,5 @@
-#include "bomberman/logic/World.h"
-#include "bomberman/logic/Random.h"
+#include "logic/World.h"
+#include "logic/Random.h"
 
 #include <algorithm>
 #include <cmath>
@@ -8,7 +8,7 @@
 
 namespace bomberman::logic {
 
-World::World(std::shared_ptr<EntityFactory> factory)
+World::World(std::shared_ptr<AbstractFactory> factory)
     : factory(std::move(factory)), scoreTracker(std::make_shared<Score>("scores.txt"))
 {
     if (this->factory == nullptr) {
@@ -202,9 +202,9 @@ void World::createArena()
 
             //Keep corners open so nobody starts stuck
             if (border || pillar) {
-                createBlock(EntityType::Wall, row, col);
+                createWall(EntityType::Wall, row, col);
             } else if (!spawnArea && Random::instance().rollChance(0.72F)) {
-                createBlock(EntityType::DestructibleBlock, row, col);
+                createWall(EntityType::DestructibleBlock, row, col);
             }
         }
     }
@@ -300,14 +300,14 @@ void World::createLevelExit()
     }
 
     const Vec2 size{tileDimensions.x * 0.8F, tileDimensions.y * 0.8F};
-    levelExit = factory->createBlock(nextId(), EntityType::Exit, tileCenter(exitRow, exitCol), size);
+    levelExit = factory->createExit(nextId(), tileCenter(exitRow, exitCol), size);
     entitiesList.push_back(levelExit);
 }
 
-void World::createBlock(EntityType type, int row, int col)
+void World::createWall(EntityType type, int row, int col)
 {
-    auto block = factory->createBlock(nextId(), type, tileCenter(row, col), tileDimensions);
-    entitiesList.push_back(block);
+    auto wall = factory->createWall(nextId(), type, tileCenter(row, col), tileDimensions);
+    entitiesList.push_back(wall);
 }
 
 void World::moveCharacter(Character& character, Vec2 velocity, float deltaTime)

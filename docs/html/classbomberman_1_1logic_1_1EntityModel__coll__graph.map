@@ -1,0 +1,5 @@
+<map id="bomberman::logic::EntityModel" name="bomberman::logic::EntityModel">
+<area shape="rect" id="Node000001" title="Base model class for every object in the logic world." alt="" coords="10,79,197,119"/>
+<area shape="rect" id="Node000002" href="$classbomberman_1_1logic_1_1Subject.html" title="Base class for objects that can notify observers about events." alt="" coords="5,5,201,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="106,44,106,79,101,79,101,44"/>
+</map>

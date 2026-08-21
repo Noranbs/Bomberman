@@ -1,5 +1,5 @@
-#include "bomberman/sfml/Game.h"
-#include "bomberman/logic/Stopwatch.h"
+#include "sfml/Game.h"
+#include "logic/Stopwatch.h"
 #include <SFML/Window/Event.hpp>
 #include <stdexcept>
 
@@ -9,7 +9,7 @@ Game::Game()
     : window(std::make_shared<sf::RenderWindow>(sf::VideoMode(960, 832), "Bomberman AP")),
       texture(std::make_shared<sf::Texture>()),
       tileTexture(std::make_shared<sf::Texture>()),
-      factory(std::make_shared<SfmlFactory>(window, texture, tileTexture)),
+      factory(std::make_shared<ConcreteFactory>(window, texture, tileTexture)),
       world(factory),
       stateManager(window, font, factory, world)
 {

@@ -1,0 +1,5 @@
+<map id="bomberman::logic::World" name="bomberman::logic::World">
+<area shape="rect" id="Node000001" title="Main logic class that owns the arena and updates the game rules." alt="" coords="11,79,196,104"/>
+<area shape="rect" id="Node000002" href="$classbomberman_1_1logic_1_1Subject.html" title="Base class for objects that can notify observers about events." alt="" coords="5,5,201,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="106,44,106,79,101,79,101,44"/>
+</map>

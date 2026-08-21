@@ -1,4 +1,4 @@
-#include "bomberman/logic/Score.h"
+#include "logic/Score.h"
 
 #include <algorithm>
 #include <fstream>

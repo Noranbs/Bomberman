@@ -1,4 +1,4 @@
-#include "bomberman/logic/Stopwatch.h"
+#include "logic/Stopwatch.h"
 
 namespace bomberman::logic {
 

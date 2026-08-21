@@ -1,0 +1,17 @@
+<map id="bomberman::sfml::EntityView" name="bomberman::sfml::EntityView">
+<area shape="rect" id="Node000001" title="Abstract SFML view for one logic entity." alt="" coords="260,129,476,155"/>
+<area shape="rect" id="Node000003" href="$classbomberman_1_1sfml_1_1BombView.html" title="View for bombs." alt="" coords="537,5,753,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="394,118,451,78,486,57,523,40,559,28,560,33,525,44,489,62,454,82,397,123"/>
+<area shape="rect" id="Node000004" href="$classbomberman_1_1sfml_1_1CharacterView.html" title="View for player and enemy characters." alt="" coords="524,55,765,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="417,122,523,89,572,77,574,83,525,94,418,127"/>
+<area shape="rect" id="Node000005" href="$classbomberman_1_1sfml_1_1ExitView.html" title="View for the level exit." alt="" coords="543,104,746,129"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="489,128,543,123,543,129,490,134"/>
+<area shape="rect" id="Node000006" href="$classbomberman_1_1sfml_1_1ExplosionView.html" title="View for explosion tiles." alt="" coords="524,153,765,179"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="490,150,524,153,523,158,489,155"/>
+<area shape="rect" id="Node000007" href="$classbomberman_1_1sfml_1_1PowerUpView.html" title="View for power&#45;up and power&#45;down items." alt="" coords="527,203,763,228"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="419,156,525,189,574,200,573,205,523,194,417,162"/>
+<area shape="rect" id="Node000008" href="$classbomberman_1_1sfml_1_1WallView.html" title="View for indestructible and destructible arena blocks." alt="" coords="541,252,748,277"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="397,161,454,201,489,221,525,238,560,249,559,254,523,243,486,226,451,205,394,165"/>
+<area shape="rect" id="Node000002" href="$classbomberman_1_1logic_1_1Observer.html" title="Interface for classes that react to game events." alt="" coords="5,129,212,155"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="226,139,260,139,260,145,226,145"/>
+</map>

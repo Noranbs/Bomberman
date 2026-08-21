@@ -6,7 +6,7 @@ Advanced Programming project. It is a small Bomberman style game made in C++20 w
 
 - Name: TODO
 - Student number: TODO
-- GitHub repository: TODO
+- 
 
 ## Build and Run
 
@@ -96,10 +96,8 @@ The score includes:
 
 The project is split in two main parts:
 
-- `include/bomberman/logic` and `src/logic`: game rules, entities, collisions, bombs, power-ups, AI, score, random, and stopwatch
-- `include/bomberman/sfml` and `src/sfml`: window, drawing, input, states, camera, and sprites
-
-The logic files do not use SFML. I made this choice because the game rules are easier to test and reason about when they do not depend on the graphics library. The SFML layer translates keyboard input into logic actions and draws the current entities, but it does not decide the rules of the game.
+- `src/logic`: game rules, entities, collisions, bombs, power-ups, AI, score, random, and stopwatch
+- `src/sfml`: window, drawing, input, states, camera, and sprites
 
 `World` became big, so I split its code in multiple `.cpp` files:
 
@@ -113,10 +111,12 @@ I kept one `World` class because the systems share the same arena state, entity 
 ```mermaid
 flowchart LR
     subgraph Logic["Logic layer"]
+        Subject["Subject\nObservable base"]
         World["World\nGame rules and level state"]
-        Entity["Entity hierarchy\nCharacter, Block, PowerUp"]
+        EntityModel["EntityModel\nBase game model"]
+        LogicEntities["Character, Wall, Bomb,\nExplosion, Exit, PowerUp"]
         Score["Score\nObserver"]
-        FactoryInterface["EntityFactory\nAbstract factory"]
+        FactoryInterface["AbstractFactory\nAbstract factory"]
         Random["Random\nSingleton"]
         Stopwatch["Stopwatch\nSingleton"]
     end
@@ -124,29 +124,34 @@ flowchart LR
     subgraph SFML["SFML representation layer"]
         Game["Game\nWindow and main loop"]
         StateManager["StateManager\nScreen flow"]
-        SfmlFactory["SfmlFactory\nConcrete factory"]
-        SpriteView["SpriteView\nEntity observer and drawing"]
+        ConcreteFactory["ConcreteFactory\nConcrete factory"]
+        EntityView["EntityView\nAbstract entity observer and drawing"]
+        SpecificViews["CharacterView, WallView,\nBombView, ExplosionView,\nPowerUpView, ExitView"]
         Camera["Camera\nWorld-to-pixel projection"]
     end
 
     Game --> StateManager
     Game --> World
     StateManager --> World
-    World --> Entity
+    Subject --> World
+    Subject --> EntityModel
+    EntityModel --> LogicEntities
+    World --> EntityModel
     World --> Score
     World --> FactoryInterface
     World --> Random
     Game --> Stopwatch
-    SfmlFactory -. implements .-> FactoryInterface
-    SfmlFactory --> SpriteView
-    SpriteView -. observes .-> Entity
-    SpriteView --> Camera
-    Score -. observes .-> Entity
+    ConcreteFactory -. implements .-> FactoryInterface
+    ConcreteFactory --> SpecificViews
+    SpecificViews -. inherit .-> EntityView
+    EntityView -. observes .-> EntityModel
+    EntityView --> Camera
+    Score -. observes .-> EntityModel
 ```
 
 ## Important Classes
 
-The main classes are `World`, `Entity`, `Character`, `Block`, `PowerUp`, `Score`, `EntityFactory`, `SfmlFactory`, `SpriteView`, `StateManager`, `Camera`, `Random`, and `Stopwatch`.
+The main classes are `Subject`, `World`, `EntityModel`, `Character`, `Wall`, `Bomb`, `Explosion`, `Exit`, `PowerUp`, `Score`, `AbstractFactory`, `ConcreteFactory`, `EntityView`, `CharacterView`, `WallView`, `BombView`, `ExplosionView`, `PowerUpView`, `ExitView`, `StateManager`, `Camera`, `Random`, and `Stopwatch`.
 
 ```mermaid
 classDiagram
@@ -155,14 +160,18 @@ classDiagram
         +onNotify(Event) void
     }
 
-    class Entity {
+    class Subject {
+        +addObserver(weak_ptr~Observer~) void
+        +notify(Event) void
+    }
+
+    class EntityModel {
         +getId() size_t
         +getType() EntityType
         +getPosition() Vec2
         +getBounds() Rect
         +blocksMovement() bool
         +killEntity() void
-        +addObserver(weak_ptr~Observer~) void
     }
 
     class Character {
@@ -177,18 +186,27 @@ classDiagram
         +resetPowerUps() void
     }
 
-    class Block {
+    class Wall
+
+    class Bomb
+
+    class Explosion {
         +explosionShape() optional~ExplosionShape~
     }
+
+    class Exit
 
     class PowerUp {
         +powerUpType() optional~PowerUpType~
     }
 
-    class EntityFactory {
+    class AbstractFactory {
         <<interface>>
         +createCharacter(...) shared_ptr~Character~
-        +createBlock(...) shared_ptr~Block~
+        +createWall(...) shared_ptr~Wall~
+        +createBomb(...) shared_ptr~Bomb~
+        +createExplosion(...) shared_ptr~Explosion~
+        +createExit(...) shared_ptr~Exit~
         +createPowerUp(...) shared_ptr~PowerUp~
     }
 
@@ -211,16 +229,24 @@ classDiagram
         +getHighScores() vector~ScoreEntry~
     }
 
-    class SfmlFactory {
+    class ConcreteFactory {
         +drawViews() void
         +clearViews() void
     }
 
-    class SpriteView {
+    class EntityView {
+        <<abstract>>
         +onNotify(Event) void
         +draw() void
         +renderLayer() int
     }
+
+    class CharacterView
+    class WallView
+    class BombView
+    class ExplosionView
+    class PowerUpView
+    class ExitView
 
     class StateManager {
         +processEvent(Event) void
@@ -230,16 +256,27 @@ classDiagram
         +continueToNextLevel() void
     }
 
-    Entity <|-- Character
-    Entity <|-- Block
-    Entity <|-- PowerUp
+    Subject <|-- World
+    Subject <|-- EntityModel
+    EntityModel <|-- Character
+    EntityModel <|-- Wall
+    EntityModel <|-- Bomb
+    EntityModel <|-- Explosion
+    EntityModel <|-- Exit
+    EntityModel <|-- PowerUp
     Observer <|.. Score
-    Observer <|.. SpriteView
-    EntityFactory <|.. SfmlFactory
-    World --> EntityFactory
+    Observer <|.. EntityView
+    EntityView <|-- CharacterView
+    EntityView <|-- WallView
+    EntityView <|-- BombView
+    EntityView <|-- ExplosionView
+    EntityView <|-- PowerUpView
+    EntityView <|-- ExitView
+    AbstractFactory <|.. ConcreteFactory
+    World --> AbstractFactory
     World --> Entity
     World --> Score
-    SfmlFactory --> SpriteView
+    ConcreteFactory --> EntityView
     StateManager --> World
 ```
 
@@ -248,17 +285,17 @@ classDiagram
 The project uses the following design patterns:
 
 - MVC: the logic layer has the game state and rules, and SFML handles input and drawing
-- Observer: entities send events to `SpriteView` and `Score`
-- Abstract Factory: `World` creates entities using `EntityFactory`, and `SfmlFactory` adds the views
+- Observer: entities send events to `EntityView` objects and `Score`
+- Abstract Factory: `World` creates entities using `AbstractFactory`, and `ConcreteFactory` adds the views
 - Singleton: `Random` and `Stopwatch` are singletons
 
 I also used a simple State pattern for menu, instructions, playing, game over, and victory.
 
-The main reason for MVC was separation of responsibility. `World` should be able to run the game even without a window, while `Game`, `StateManager`, and `SpriteView` should only care about input, screens, and rendering. This also made the logic tests possible.
+The main reason for MVC was separation of responsibility. `World` should be able to run the game even without a window, while `Game`, `StateManager`, and the `EntityView` classes should only care about input, screens, and rendering. This also made the logic tests possible.
 
-The Observer pattern was useful because different parts of the program need to react to the same entity changes. When an entity moves or dies, `SpriteView` can update the visual representation and `Score` can react to score events without the entity needing to know about either system.
+The Observer pattern was useful because different parts of the program need to react to the same entity changes. When an entity moves or dies, the matching `EntityView` can update the visual representation and `Score` can react to score events without the entity needing to know about either system.
 
-The Abstract Factory was used because `World` needs to create characters, blocks, bombs, explosions, exits, and power-ups, but it should not know how SFML sprites are created. In the real game, `SfmlFactory` creates the logic entity and attaches its view. In the tests, a small test factory creates only logic entities.
+The Abstract Factory was used because `World` needs to create characters, blocks, bombs, explosions, exits, and power-ups, but it should not know how SFML sprites are created. In the real game, `ConcreteFactory` creates the logic entity and attaches its view. In the tests, a small test factory creates only logic entities.
 
 `Random` and `Stopwatch` were made singletons because random generation and time are shared services. This avoids passing them through every method that needs them. I kept the actual game state out of singletons, because the state belongs to `World`.
 
@@ -344,7 +381,7 @@ The tests use a small test factory, so they can run without SFML.
 
 The easiest parts to implement were the basic entities, movement, and drawing once the logic and SFML layers were separated. The entity model is small, and using world coordinates plus tile conversion made collision and rendering predictable.
 
-The scoring system was also quite manageable after adding events. Instead of checking score changes everywhere manually, the score class can listen for the events it needs and keep the high score file separate from the rest of the game logic.
+The scoring system was also easier than the AI and bomb logic. Most score changes happen when something important happens in the game, such as destroying a block, collecting a power-up, killing an enemy, winning, or losing. Because of that, the score code could stay mostly inside the `Score` class instead of being spread through the whole project.
 
 The more difficult parts were bombs, explosions, and AI. Bombs interact with many systems at once: collision, ownership, available bomb count, soft block destruction, power-up burning, chain reactions, enemy damage, player damage, and kicked movement. Small mistakes there could create bugs that only appeared after several timed updates.
 

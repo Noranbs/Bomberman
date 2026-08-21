@@ -1,4 +1,4 @@
-#include "bomberman/logic/World.h"
+#include "logic/World.h"
 
 #include <algorithm>
 #include <array>
@@ -74,7 +74,7 @@ void World::placeBombFor(const std::shared_ptr<Character>& character)
     }
 
     //New bomb starts on character tile and uses character radius
-    auto bomb = factory->createBlock(nextId(), EntityType::Bomb, tileCenter(row, col), tileDimensions);
+    auto bomb = factory->createBomb(nextId(), tileCenter(row, col), tileDimensions);
     bombsList.push_back({bomb, character, 2.0F, character->getBombRadius(), false, false, {}, row, col, false});
     entitiesList.push_back(bomb);
 }
@@ -295,8 +295,7 @@ void World::explodeBomb(std::size_t index)
 
 void World::createExplosionTile(int row, int col)
 {
-    //Explosion is stored as a block entity so the view can draw it
-    auto explosion = factory->createBlock(nextId(), EntityType::Explosion, tileCenter(row, col), tileDimensions);
+    auto explosion = factory->createExplosion(nextId(), tileCenter(row, col), tileDimensions, ExplosionShape::Center);
     explosionsList.push_back({explosion, 0.65F});
     entitiesList.push_back(explosion);
 }

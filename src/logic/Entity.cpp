@@ -1,60 +1,14 @@
-#include "bomberman/logic/Entity.h"
+#include "logic/Entity.h"
 #include <algorithm>
 
 namespace bomberman::logic {
 
-Entity::Entity(std::size_t id, EntityType type, Vec2 position, Vec2 size)
-    : entityId(id), entityType(type), pos(position), dimensions(size)
-{
-}
-
-Rect Entity::getBounds() const
-{
-    return {pos, {dimensions.x * 0.5F, dimensions.y * 0.5F}};
-}
-
-bool Entity::blocksMovement() const
-{
-    return entityType == EntityType::Wall || entityType == EntityType::DestructibleBlock ||
-           entityType == EntityType::Bomb;
-}
-
-std::optional<PowerUpType> Entity::powerUpType() const
-{
-    return std::nullopt;
-}
-
-std::optional<ExplosionShape> Entity::explosionShape() const
-{
-    return std::nullopt;
-}
-
-std::optional<Direction> Entity::facingDirection() const
-{
-    return std::nullopt;
-}
-
-void Entity::setPosition(Vec2 position)
-{
-    pos = position;
-    notify({EventType::EntityMoved, entityId, 0});
-}
-
-void Entity::killEntity()
-{
-    if (!aliveState) {
-        return;
-    }
-    aliveState = false;
-    notify({EventType::EntityDied, entityId, 0});
-}
-
-void Entity::addObserver(const std::weak_ptr<Observer>& observer)
+void Subject::addObserver(const std::weak_ptr<Observer>& observer)
 {
     observers.push_back(observer);
 }
 
-void Entity::notify(const Event& event)
+void Subject::notify(const Event& event)
 {
     observers.erase(std::remove_if(observers.begin(),
                                    observers.end(),
@@ -69,8 +23,54 @@ void Entity::notify(const Event& event)
                     observers.end());
 }
 
+EntityModel::EntityModel(std::size_t id, EntityType type, Vec2 position, Vec2 size)
+    : entityId(id), entityType(type), pos(position), dimensions(size)
+{
+}
+
+Rect EntityModel::getBounds() const
+{
+    return {pos, {dimensions.x * 0.5F, dimensions.y * 0.5F}};
+}
+
+bool EntityModel::blocksMovement() const
+{
+    return entityType == EntityType::Wall || entityType == EntityType::DestructibleBlock ||
+           entityType == EntityType::Bomb;
+}
+
+std::optional<PowerUpType> EntityModel::powerUpType() const
+{
+    return std::nullopt;
+}
+
+std::optional<ExplosionShape> EntityModel::explosionShape() const
+{
+    return std::nullopt;
+}
+
+std::optional<Direction> EntityModel::facingDirection() const
+{
+    return std::nullopt;
+}
+
+void EntityModel::setPosition(Vec2 position)
+{
+    pos = position;
+    notify({EventType::EntityMoved, entityId, 0});
+}
+
+void EntityModel::killEntity()
+{
+    if (!aliveState) {
+        return;
+    }
+    aliveState = false;
+    notify({EventType::EntityDied, entityId, 0});
+}
+
 Character::Character(std::size_t id, EntityType type, Vec2 position, Vec2 size)
-    : Entity(id, type, position, size)
+    : EntityModel(id, type, position, size)
 {
 }
 
@@ -181,23 +181,33 @@ void Character::replenishBomb()
     }
 }
 
-Block::Block(std::size_t id, EntityType type, Vec2 position, Vec2 size)
-    : Entity(id, type, position, size)
+Wall::Wall(std::size_t id, EntityType type, Vec2 position, Vec2 size)
+    : EntityModel(id, type, position, size)
 {
 }
 
-Block::Block(std::size_t id, EntityType type, Vec2 position, Vec2 size, ExplosionShape explosionShape)
-    : Entity(id, type, position, size), explosionShapeKind(explosionShape)
+Bomb::Bomb(std::size_t id, Vec2 position, Vec2 size)
+    : EntityModel(id, EntityType::Bomb, position, size)
 {
 }
 
-std::optional<ExplosionShape> Block::explosionShape() const
+Explosion::Explosion(std::size_t id, Vec2 position, Vec2 size, ExplosionShape explosionShape)
+    : EntityModel(id, EntityType::Explosion, position, size), explosionShapeKind(explosionShape)
+{
+}
+
+std::optional<ExplosionShape> Explosion::explosionShape() const
 {
     return explosionShapeKind;
 }
 
+Exit::Exit(std::size_t id, Vec2 position, Vec2 size)
+    : EntityModel(id, EntityType::Exit, position, size)
+{
+}
+
 PowerUp::PowerUp(std::size_t id, Vec2 position, Vec2 size, PowerUpType powerUpType)
-    : Entity(id, EntityType::PowerUp, position, size), powerUpKind(powerUpType)
+    : EntityModel(id, EntityType::PowerUp, position, size), powerUpKind(powerUpType)
 {
 }
 

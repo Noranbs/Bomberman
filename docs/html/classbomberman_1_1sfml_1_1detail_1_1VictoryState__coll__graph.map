@@ -1,0 +1,7 @@
+<map id="bomberman::sfml::detail::VictoryState" name="bomberman::sfml::detail::VictoryState">
+<area shape="rect" id="Node000001" title="Victory screen state shown after the player reaches the level exit." alt="" coords="33,168,215,208"/>
+<area shape="rect" id="Node000002" href="$classbomberman_1_1sfml_1_1State.html" title="Base class for one game screen." alt="" coords="34,93,214,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="127,132,127,168,121,168,121,132"/>
+<area shape="rect" id="Node000003" href="$classbomberman_1_1sfml_1_1StateManager.html" title="Switches between menu, playing, game&#45;over, and victory states." alt="" coords="5,5,243,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="127,45,127,93,121,93,121,45"/>
+</map>

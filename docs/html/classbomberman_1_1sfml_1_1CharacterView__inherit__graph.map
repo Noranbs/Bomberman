@@ -1,0 +1,7 @@
+<map id="bomberman::sfml::CharacterView" name="bomberman::sfml::CharacterView">
+<area shape="rect" id="Node000001" title="View for player and enemy characters." alt="" coords="5,152,247,177"/>
+<area shape="rect" id="Node000002" href="$classbomberman_1_1sfml_1_1EntityView.html" title="Abstract SFML view for one logic entity." alt="" coords="18,79,234,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="129,118,129,152,123,152,123,118"/>
+<area shape="rect" id="Node000003" href="$classbomberman_1_1logic_1_1Observer.html" title="Interface for classes that react to game events." alt="" coords="23,5,229,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="129,44,129,79,123,79,123,44"/>
+</map>

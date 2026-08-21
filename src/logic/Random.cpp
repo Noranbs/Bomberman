@@ -1,4 +1,4 @@
-#include "bomberman/logic/Random.h"
+#include "logic/Random.h"
 #include <chrono>
 
 namespace bomberman::logic {

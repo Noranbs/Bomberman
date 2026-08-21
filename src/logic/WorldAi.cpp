@@ -1,5 +1,5 @@
-#include "bomberman/logic/World.h"
-#include "bomberman/logic/Random.h"
+#include "logic/World.h"
+#include "logic/Random.h"
 
 #include <algorithm>
 #include <array>

@@ -15,12 +15,12 @@
 #include <vector>
 
 #define private public
-#include "bomberman/logic/World.h"
+#include "logic/World.h"
 #undef private
 
 using namespace bomberman::logic;
 
-class TestFactory final : public EntityFactory {
+class TestFactory final : public AbstractFactory {
 public:
     std::shared_ptr<Character> createCharacter(std::size_t id,
                                                EntityType type,
@@ -30,16 +30,27 @@ public:
         return std::make_shared<Character>(id, type, position, size);
     }
 
-    std::shared_ptr<Block> createBlock(std::size_t id,
-                                       EntityType type,
-                                       Vec2 position,
-                                       Vec2 size,
-                                       std::optional<ExplosionShape> explosionShape = std::nullopt) override
+    std::shared_ptr<Wall> createWall(std::size_t id, EntityType type, Vec2 position, Vec2 size) override
     {
-        if (explosionShape.has_value()) {
-            return std::make_shared<Block>(id, type, position, size, *explosionShape);
-        }
-        return std::make_shared<Block>(id, type, position, size);
+        return std::make_shared<Wall>(id, type, position, size);
+    }
+
+    std::shared_ptr<Bomb> createBomb(std::size_t id, Vec2 position, Vec2 size) override
+    {
+        return std::make_shared<Bomb>(id, position, size);
+    }
+
+    std::shared_ptr<Explosion> createExplosion(std::size_t id,
+                                               Vec2 position,
+                                               Vec2 size,
+                                               ExplosionShape explosionShape) override
+    {
+        return std::make_shared<Explosion>(id, position, size, explosionShape);
+    }
+
+    std::shared_ptr<Exit> createExit(std::size_t id, Vec2 position, Vec2 size) override
+    {
+        return std::make_shared<Exit>(id, position, size);
     }
 
     std::shared_ptr<PowerUp> createPowerUp(std::size_t id,
@@ -142,7 +153,7 @@ void testBombKickAndRubberBounceFlags()
 
     world.player()->setDirection(Direction::Right);
     const auto [row, col] = world.tileForPosition(world.player()->getPosition());
-    auto bomb = factory->createBlock(world.nextId(), EntityType::Bomb, world.tileCenter(row, col + 1), world.tileDimensions);
+    auto bomb = factory->createBomb(world.nextId(), world.tileCenter(row, col + 1), world.tileDimensions);
     world.bombsList.push_back({bomb, world.player(), 2.0F, 1, true, false, {}, row, col + 1, false});
     world.entitiesList.push_back(bomb);
 

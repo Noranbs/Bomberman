@@ -19,7 +19,7 @@ add_library(bomberman_logic
 
 target_include_directories(bomberman_logic
         PUBLIC
-        ${PROJECT_SOURCE_DIR}/include)
+        ${PROJECT_SOURCE_DIR}/src)
 
 target_compile_options(bomberman_logic PRIVATE -Wall -Wextra -Wpedantic)
 
@@ -27,9 +27,9 @@ find_package(SFML 2.5 COMPONENTS graphics window system REQUIRED)
 
 add_executable(Bomberman_AP
         src/sfml/Game.cpp
-        src/sfml/SfmlFactory.cpp
+        src/sfml/ConcreteFactory.cpp
         src/sfml/StateManager.cpp
-        src/sfml/SpriteView.cpp
+        src/sfml/EntityView.cpp
         main.cpp)
 
 target_link_libraries(Bomberman_AP
@@ -61,9 +61,3 @@ add_custom_command(TARGET Bomberman_AP POST_BUILD
 
 install(TARGETS Bomberman_AP DESTINATION bin)
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/assets DESTINATION .)
-
-find_package(Doxygen)
-if(DOXYGEN_FOUND)
-    set(DOXYGEN_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/doc)
-    doxygen_add_docs(doc ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/src)
-endif()

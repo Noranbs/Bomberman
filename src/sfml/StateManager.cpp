@@ -1,5 +1,5 @@
-#include "bomberman/sfml/StateManager.h"
-#include "bomberman/logic/Stopwatch.h"
+#include "sfml/StateManager.h"
+#include "logic/Stopwatch.h"
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Window/Keyboard.hpp>
@@ -14,7 +14,7 @@
 
 namespace bomberman::sfml {
 
-namespace {
+namespace state {
 
 const sf::FloatRect playButtonBounds{260.0F, 620.0F, 200.0F, 64.0F};
 const sf::FloatRect instructionsButtonBounds{500.0F, 620.0F, 200.0F, 64.0F};
@@ -70,6 +70,9 @@ void renderHud(StateManager& manager)
     manager.window()->draw(text);
 }
 
+/**
+ * @brief Main menu state with play, instructions, and high scores.
+ */
 class MenuState final : public State {
 public:
     using State::State;
@@ -117,6 +120,9 @@ public:
     }
 };
 
+/**
+ * @brief Instructions screen state that shows controls and power-ups.
+ */
 class InstructionsState final : public State {
 public:
     using State::State;
@@ -177,6 +183,9 @@ private:
     }
 };
 
+/**
+ * @brief Active gameplay state that forwards input to the logic world.
+ */
 class PlayingState final : public State {
 public:
     using State::State;
@@ -275,6 +284,9 @@ private:
     bool paused{false};
 };
 
+/**
+ * @brief Game-over screen state shown when the player has no lives left.
+ */
 class GameOverState final : public State {
 public:
     using State::State;
@@ -320,6 +332,9 @@ public:
     }
 };
 
+/**
+ * @brief Victory screen state shown after the player reaches the level exit.
+ */
 class VictoryState final : public State {
 public:
     using State::State;
@@ -421,7 +436,7 @@ private:
     std::chrono::steady_clock::time_point animationStart{std::chrono::steady_clock::now()};
 };
 
-} // namespace
+} // namespace state
 
 State::State(StateManager& manager)
     : manager(manager)
@@ -430,7 +445,7 @@ State::State(StateManager& manager)
 
 StateManager::StateManager(std::shared_ptr<sf::RenderWindow> window,
                            const sf::Font& font,
-                           std::shared_ptr<SfmlFactory> factory,
+                           std::shared_ptr<ConcreteFactory> factory,
                            logic::World& world)
     : renderWindow(std::move(window)), fontRef(font), entityFactory(std::move(factory)), gameWorld(world)
 {
@@ -456,22 +471,22 @@ void StateManager::transitionTo(StateId stateId)
 {
     switch (stateId) {
     case StateId::Menu:
-        currentState = std::make_unique<MenuState>(*this);
+        currentState = std::make_unique<state::MenuState>(*this);
         break;
     case StateId::Instructions:
-        currentState = std::make_unique<InstructionsState>(*this);
+        currentState = std::make_unique<state::InstructionsState>(*this);
         break;
     case StateId::Playing:
         entityFactory->clearViews();
         gameWorld.startNewGame();
         logic::Stopwatch::instance().reset();
-        currentState = std::make_unique<PlayingState>(*this);
+        currentState = std::make_unique<state::PlayingState>(*this);
         break;
     case StateId::GameOver:
-        currentState = std::make_unique<GameOverState>(*this);
+        currentState = std::make_unique<state::GameOverState>(*this);
         break;
     case StateId::Victory:
-        currentState = std::make_unique<VictoryState>(*this);
+        currentState = std::make_unique<state::VictoryState>(*this);
         break;
     }
 }
@@ -481,14 +496,14 @@ void StateManager::continueToNextLevel()
     entityFactory->clearViews();
     gameWorld.startNextLevel();
     logic::Stopwatch::instance().reset();
-    currentState = std::make_unique<PlayingState>(*this);
+    currentState = std::make_unique<state::PlayingState>(*this);
 }
 
 std::shared_ptr<sf::RenderWindow> StateManager::window() const { return renderWindow; }
 
 const sf::Font& StateManager::font() const { return fontRef; }
 
-std::shared_ptr<SfmlFactory> StateManager::factory() const { return entityFactory; }
+std::shared_ptr<ConcreteFactory> StateManager::factory() const { return entityFactory; }
 
 logic::World& StateManager::world() const { return gameWorld; }
 

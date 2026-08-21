@@ -1,0 +1,7 @@
+<map id="bomberman::logic::Character" name="bomberman::logic::Character">
+<area shape="rect" id="Node000001" title="A moving player or enemy." alt="" coords="5,167,216,192"/>
+<area shape="rect" id="Node000002" href="$classbomberman_1_1logic_1_1EntityModel.html" title="Base model class for every object in the logic world." alt="" coords="17,79,204,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="113,132,113,166,108,166,108,132"/>
+<area shape="rect" id="Node000003" href="$classbomberman_1_1logic_1_1Subject.html" title="Base class for objects that can notify observers about events." alt="" coords="13,5,209,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="113,44,113,79,108,79,108,44"/>
+</map>

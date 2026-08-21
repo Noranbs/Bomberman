@@ -1,0 +1,7 @@
+<map id="bomberman::sfml::WallView" name="bomberman::sfml::WallView">
+<area shape="rect" id="Node000001" title="View for indestructible and destructible arena blocks." alt="" coords="10,152,217,177"/>
+<area shape="rect" id="Node000002" href="$classbomberman_1_1sfml_1_1EntityView.html" title="Abstract SFML view for one logic entity." alt="" coords="5,79,221,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="116,118,116,152,111,152,111,118"/>
+<area shape="rect" id="Node000003" href="$classbomberman_1_1logic_1_1Observer.html" title="Interface for classes that react to game events." alt="" coords="10,5,217,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="116,44,116,79,111,79,111,44"/>
+</map>

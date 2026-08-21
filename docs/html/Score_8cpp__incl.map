@@ -1,0 +1,22 @@
+<map id="src/logic/Score.cpp" name="src/logic/Score.cpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="333,5,476,31"/>
+<area shape="rect" id="Node000002" href="$Score_8h.html" title=" " alt="" coords="180,79,285,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="378,33,274,76,272,71,376,28"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="310,79,395,104"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="398,33,371,69,367,66,394,29"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="420,79,493,104"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="415,29,442,66,438,69,411,33"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="517,79,604,104"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="431,28,524,70,522,75,429,33"/>
+<area shape="rect" id="Node000003" href="$Event_8h.html" title=" " alt="" coords="87,152,194,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="220,106,168,146,165,141,216,102"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="203,225,265,251"/>
+<area shape="poly" id="edge7_Node000002_Node000006" title=" " alt="" coords="235,104,236,212,231,212,230,104"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="270,152,361,177"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="248,102,293,141,290,145,244,106"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,225,76,251"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="126,180,70,219,67,215,123,175"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="101,225,178,251"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="143,178,142,212,137,212,138,178"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="157,175,210,215,206,219,154,179"/>
+</map>

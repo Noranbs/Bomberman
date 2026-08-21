@@ -1,0 +1,5 @@
+<map id="bomberman::sfml::State" name="bomberman::sfml::State">
+<area shape="rect" id="Node000001" title="Base class for one game screen." alt="" coords="34,93,214,119"/>
+<area shape="rect" id="Node000002" href="$classbomberman_1_1sfml_1_1StateManager.html" title="Switches between menu, playing, game&#45;over, and victory states." alt="" coords="5,5,243,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="127,45,127,93,121,93,121,45"/>
+</map>

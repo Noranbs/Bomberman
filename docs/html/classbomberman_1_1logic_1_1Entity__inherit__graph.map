@@ -1,0 +1,9 @@
+<map id="bomberman::logic::Entity" name="bomberman::logic::Entity">
+<area shape="rect" id="Node000001" title="Base class for every object in the logic world." alt="" coords="225,5,412,31"/>
+<area shape="rect" id="Node000002" href="$classbomberman_1_1logic_1_1Block.html" title="Entity used for walls, bombs, explosions, and the exit." alt="" coords="5,79,189,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="271,37,134,81,132,76,270,32"/>
+<area shape="rect" id="Node000003" href="$classbomberman_1_1logic_1_1Character.html" title="A moving player or enemy." alt="" coords="213,79,424,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="321,44,321,79,316,79,316,44"/>
+<area shape="rect" id="Node000004" href="$classbomberman_1_1logic_1_1PowerUp.html" title="Pickable item that changes character stats or score." alt="" coords="449,79,655,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="370,32,515,76,513,81,368,37"/>
+</map>

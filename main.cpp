@@ -1,4 +1,4 @@
-#include "bomberman/sfml/Game.h"
+#include "sfml/Game.h"
 
 #include <exception>
 #include <iostream>
