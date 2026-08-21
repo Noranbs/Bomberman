@@ -4,8 +4,8 @@ Advanced Programming project: a small Bomberman style game written in C++20 with
 
 ## Student
 
-- Name: TODO
-- Student number: TODO
+- Name: Noran Ben Said
+- Student number: 20240211
 ## Build and Run
 
 The project uses CMake. The game logic is built as a separate library, and the SFML application links against it.

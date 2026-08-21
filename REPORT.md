@@ -1,8 +1,8 @@
 # Bomberman AP Report
 
-- Name: TODO
-- Student number: TODO
-- GitHub repository: TODO
+- Name: Noran Ben Said
+- Student number: 20240211
+- GitHub repository: https://github.com/Noranbs/Bomberman
 
 ## 1. Introduction
 
