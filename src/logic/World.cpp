@@ -112,6 +112,46 @@ void World::handlePlayerAction(Action action, bool active)
     }
 }
 
+void MoveLeftCommand::execute(World& world, bool active) const
+{
+    world.handlePlayerAction(Action::MoveLeft, active);
+}
+
+void MoveRightCommand::execute(World& world, bool active) const
+{
+    world.handlePlayerAction(Action::MoveRight, active);
+}
+
+void MoveUpCommand::execute(World& world, bool active) const
+{
+    world.handlePlayerAction(Action::MoveUp, active);
+}
+
+void MoveDownCommand::execute(World& world, bool active) const
+{
+    world.handlePlayerAction(Action::MoveDown, active);
+}
+
+void StopHorizontalCommand::execute(World& world, bool active) const
+{
+    world.handlePlayerAction(Action::StopHorizontal, active);
+}
+
+void StopVerticalCommand::execute(World& world, bool active) const
+{
+    world.handlePlayerAction(Action::StopVertical, active);
+}
+
+void PlaceBombCommand::execute(World& world, bool active) const
+{
+    world.handlePlayerAction(Action::PlaceBomb, active);
+}
+
+void KickBombCommand::execute(World& world, bool active) const
+{
+    world.handlePlayerAction(Action::KickBomb, active);
+}
+
 int World::enemiesAlive() const
 {
     return static_cast<int>(std::count_if(enemiesList.begin(), enemiesList.end(), [](const auto& enemy) {

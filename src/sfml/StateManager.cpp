@@ -22,6 +22,20 @@ const sf::FloatRect instructionsBackButtonBounds{380.0F, 754.0F, 200.0F, 54.0F};
 const sf::FloatRect playAgainButtonBounds{260.0F, 620.0F, 200.0F, 64.0F};
 const sf::FloatRect menuButtonBounds{500.0F, 620.0F, 200.0F, 64.0F};
 
+const logic::MoveLeftCommand moveLeftCommand{};
+const logic::MoveRightCommand moveRightCommand{};
+const logic::MoveUpCommand moveUpCommand{};
+const logic::MoveDownCommand moveDownCommand{};
+const logic::StopHorizontalCommand stopHorizontalCommand{};
+const logic::StopVerticalCommand stopVerticalCommand{};
+const logic::PlaceBombCommand placeBombCommand{};
+const logic::KickBombCommand kickBombCommand{};
+
+void executePlayerCommand(StateManager& manager, const logic::PlayerCommand& command, bool active = true)
+{
+    command.execute(manager.world(), active);
+}
+
 void drawButton(sf::RenderWindow& window,
                 const sf::Font& font,
                 const sf::FloatRect& bounds,
@@ -194,22 +208,22 @@ public:
     {
         if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Enter) {
             paused = !paused;
-            manager.world().handlePlayerAction(logic::Action::StopHorizontal, true);
-            manager.world().handlePlayerAction(logic::Action::StopVertical, true);
+            executePlayerCommand(manager, stopHorizontalCommand);
+            executePlayerCommand(manager, stopVerticalCommand);
         }
 
         if (paused && event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) {
-            manager.world().handlePlayerAction(logic::Action::StopHorizontal, true);
-            manager.world().handlePlayerAction(logic::Action::StopVertical, true);
+            executePlayerCommand(manager, stopHorizontalCommand);
+            executePlayerCommand(manager, stopVerticalCommand);
             manager.transitionTo(StateId::Menu);
         }
 
         if (!paused && event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space) {
-            manager.world().handlePlayerAction(logic::Action::PlaceBomb, true);
+            executePlayerCommand(manager, placeBombCommand);
         }
 
         if (!paused && event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::K) {
-            manager.world().handlePlayerAction(logic::Action::KickBomb, true);
+            executePlayerCommand(manager, kickBombCommand);
         }
     }
 
@@ -265,19 +279,19 @@ private:
         const bool down = sf::Keyboard::isKeyPressed(sf::Keyboard::Down) || sf::Keyboard::isKeyPressed(sf::Keyboard::S);
 
         if (left == right) {
-            manager.world().handlePlayerAction(logic::Action::StopHorizontal, true);
+            executePlayerCommand(manager, stopHorizontalCommand);
         } else if (left) {
-            manager.world().handlePlayerAction(logic::Action::MoveLeft, true);
+            executePlayerCommand(manager, moveLeftCommand);
         } else {
-            manager.world().handlePlayerAction(logic::Action::MoveRight, true);
+            executePlayerCommand(manager, moveRightCommand);
         }
 
         if (up == down) {
-            manager.world().handlePlayerAction(logic::Action::StopVertical, true);
+            executePlayerCommand(manager, stopVerticalCommand);
         } else if (up) {
-            manager.world().handlePlayerAction(logic::Action::MoveUp, true);
+            executePlayerCommand(manager, moveUpCommand);
         } else {
-            manager.world().handlePlayerAction(logic::Action::MoveDown, true);
+            executePlayerCommand(manager, moveDownCommand);
         }
     }
 

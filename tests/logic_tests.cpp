@@ -87,6 +87,28 @@ void testMovementAndBombReuse()
     assert(world.player()->getAvailableBombs() == 1);
 }
 
+void testPlayerCommandsExecuteWorldActions()
+{
+    auto factory = std::make_shared<TestFactory>();
+    World world(factory);
+    world.startNewGame();
+
+    const MoveRightCommand moveRight{};
+    const StopHorizontalCommand stopHorizontal{};
+    const PlaceBombCommand placeBomb{};
+
+    const Vec2 start = world.player()->getPosition();
+    moveRight.execute(world, true);
+    world.update(0.25F);
+    stopHorizontal.execute(world, true);
+
+    assert(world.player()->getPosition().x > start.x);
+
+    const auto beforeBomb = world.entities().size();
+    placeBomb.execute(world, true);
+    assert(world.entities().size() == beforeBomb + 1);
+}
+
 void testPowerUpsPersistBetweenLevels()
 {
     auto factory = std::make_shared<TestFactory>();
@@ -223,6 +245,7 @@ void testSurvivalTimeScoreAccumulatesSmallDeltas()
 int main()
 {
     testMovementAndBombReuse();
+    testPlayerCommandsExecuteWorldActions();
     testPowerUpsPersistBetweenLevels();
     testLifeLossResetsPlayerPowerUpsOnly();
     testLevelCap();

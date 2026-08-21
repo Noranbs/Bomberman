@@ -24,6 +24,63 @@ enum class Action {
     KickBomb        ///< Kick an adjacent bomb.
 };
 
+class World;
+
+/**
+ * @brief Command interface for player actions.
+ */
+class PlayerCommand {
+public:
+    virtual ~PlayerCommand() = default;
+
+    /**
+     * @brief Applies this command to the world.
+     * @param world World that receives the action.
+     * @param active True when the action starts or is held.
+     */
+    virtual void execute(World& world, bool active) const = 0;
+};
+
+class MoveLeftCommand final : public PlayerCommand {
+public:
+    void execute(World& world, bool active) const override;
+};
+
+class MoveRightCommand final : public PlayerCommand {
+public:
+    void execute(World& world, bool active) const override;
+};
+
+class MoveUpCommand final : public PlayerCommand {
+public:
+    void execute(World& world, bool active) const override;
+};
+
+class MoveDownCommand final : public PlayerCommand {
+public:
+    void execute(World& world, bool active) const override;
+};
+
+class StopHorizontalCommand final : public PlayerCommand {
+public:
+    void execute(World& world, bool active) const override;
+};
+
+class StopVerticalCommand final : public PlayerCommand {
+public:
+    void execute(World& world, bool active) const override;
+};
+
+class PlaceBombCommand final : public PlayerCommand {
+public:
+    void execute(World& world, bool active) const override;
+};
+
+class KickBombCommand final : public PlayerCommand {
+public:
+    void execute(World& world, bool active) const override;
+};
+
 /**
  * @brief Main logic class that owns the arena and updates the game rules.
  *
