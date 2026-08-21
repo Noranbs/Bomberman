@@ -61,3 +61,13 @@ add_custom_command(TARGET Bomberman_AP POST_BUILD
 
 install(TARGETS Bomberman_AP DESTINATION bin)
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/assets DESTINATION .)
+
+find_package(Doxygen)
+if(DOXYGEN_FOUND)
+    set(DOXYGEN_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/doc)
+    set(DOXYGEN_RECURSIVE YES)
+    set(DOXYGEN_EXTRACT_ALL YES)
+    set(DOXYGEN_EXTRACT_ANON_NSPACES YES)
+    set(DOXYGEN_HAVE_DOT YES)
+    doxygen_add_docs(doc ${PROJECT_SOURCE_DIR}/src COMMENT "Generate Doxygen documentation")
+endif()
