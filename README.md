@@ -157,89 +157,33 @@ The main classes are `Subject`, `World`, `EntityModel`, `Character`, `Wall`, `Bo
 classDiagram
     class Observer {
         <<interface>>
-        +onNotify(Event) void
     }
 
-    class Subject {
-        +addObserver(weak_ptr~Observer~) void
-        +notify(Event) void
-    }
+    class Subject
 
-    class EntityModel {
-        +getId() size_t
-        +getType() EntityType
-        +getPosition() Vec2
-        +getBounds() Rect
-        +blocksMovement() bool
-        +killEntity() void
-    }
+    class EntityModel
 
-    class Character {
-        +getSpeed() float
-        +getBombRadius() int
-        +getBombCapacity() int
-        +tryPlaceBomb() bool
-        +expandExplosionRange() void
-        +increaseMaxBombs() void
-        +enableBombKick() void
-        +enableRubberBombs() void
-        +resetPowerUps() void
-    }
+    class Character
 
     class Wall
 
     class Bomb
 
-    class Explosion {
-        +explosionShape() optional~ExplosionShape~
-    }
+    class Explosion
 
     class Exit
 
-    class PowerUp {
-        +powerUpType() optional~PowerUpType~
-    }
+    class PowerUp
 
     class AbstractFactory {
         <<interface>>
-        +createCharacter(...) shared_ptr~Character~
-        +createWall(...) shared_ptr~Wall~
-        +createBomb(...) shared_ptr~Bomb~
-        +createExplosion(...) shared_ptr~Explosion~
-        +createExit(...) shared_ptr~Exit~
-        +createPowerUp(...) shared_ptr~PowerUp~
     }
 
-    class World {
-        +startNewGame() void
-        +startNextLevel() void
-        +update(float) void
-        +handlePlayerAction(Action, bool) void
-        +playerWon() bool
-        -createArena() void
-        -placeBombFor(Character) void
-        -kickPlayerBomb() void
-        -applyPowerUp(Character, PowerUpType) void
-    }
+    class ConcreteFactory
 
-    class Score {
-        +onNotify(Event) void
-        +resetCurrentScore() void
-        +addSurvivalTimeScore(float) void
-        +getHighScores() vector~ScoreEntry~
-    }
+    class Score
 
-    class ConcreteFactory {
-        +drawViews() void
-        +clearViews() void
-    }
-
-    class EntityView {
-        <<abstract>>
-        +onNotify(Event) void
-        +draw() void
-        +renderLayer() int
-    }
+    class EntityView
 
     class CharacterView
     class WallView
@@ -248,14 +192,27 @@ classDiagram
     class PowerUpView
     class ExitView
 
-    class StateManager {
-        +processEvent(Event) void
-        +update(float) void
-        +render() void
-        +transitionTo(StateId) void
-        +continueToNextLevel() void
-    }
+    class State
 
+    class MenuState
+    class InstructionsState
+    class PlayingState
+    class GameOverState
+    class VictoryState
+
+    class World
+    class Camera
+    class Game
+    class StateManager
+    class Random
+    class Stopwatch
+    class Rect
+    class Vec2
+    class ScoreEntry
+
+    AbstractFactory <|.. ConcreteFactory
+    Observer <|.. Score
+    Observer <|.. EntityView
     Subject <|-- World
     Subject <|-- EntityModel
     EntityModel <|-- Character
@@ -264,17 +221,19 @@ classDiagram
     EntityModel <|-- Explosion
     EntityModel <|-- Exit
     EntityModel <|-- PowerUp
-    Observer <|.. Score
-    Observer <|.. EntityView
     EntityView <|-- CharacterView
     EntityView <|-- WallView
     EntityView <|-- BombView
     EntityView <|-- ExplosionView
     EntityView <|-- PowerUpView
     EntityView <|-- ExitView
-    AbstractFactory <|.. ConcreteFactory
+    State <|-- MenuState
+    State <|-- InstructionsState
+    State <|-- PlayingState
+    State <|-- GameOverState
+    State <|-- VictoryState
     World --> AbstractFactory
-    World --> Entity
+    World --> EntityModel
     World --> Score
     ConcreteFactory --> EntityView
     StateManager --> World
