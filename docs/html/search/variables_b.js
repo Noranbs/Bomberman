@@ -1,6 +1,9 @@
 var searchData=
 [
-  ['texture_0',['texture',['../classbomberman_1_1sfml_1_1EntityView.html#a0cd2c54c8f519c9770c97f2b607bd88a',1,'bomberman::sfml::EntityView']]],
-  ['tiletexture_1',['tileTexture',['../classbomberman_1_1sfml_1_1EntityView.html#a8f4190f4e0913c4d57431674a60e860a',1,'bomberman::sfml::EntityView']]],
-  ['type_2',['type',['../structbomberman_1_1logic_1_1Event.html#ab1eb5ef0589c07cb657986324aa59f00',1,'bomberman::logic::Event']]]
+  ['score_0',['score',['../structbomberman_1_1logic_1_1ScoreEntry.html#a7b6b1c0590882e964eaa3f2f4197af5c',1,'bomberman::logic::ScoreEntry']]],
+  ['sprite_1',['sprite',['../classbomberman_1_1sfml_1_1EntityView.html#aed27753c0f685249c5f065bca04c8915',1,'bomberman::sfml::EntityView']]],
+  ['spriteorigin_2',['spriteOrigin',['../classbomberman_1_1sfml_1_1EntityView.html#a817b2e265ed3ad4465db3fdcf33549b3',1,'bomberman::sfml::EntityView']]],
+  ['spritesourcesize_3',['spriteSourceSize',['../classbomberman_1_1sfml_1_1EntityView.html#a068941b8d34a59f3c302c13b54ed15a5',1,'bomberman::sfml::EntityView']]],
+  ['stophorizontalcommand_4',['stopHorizontalCommand',['../namespacebomberman_1_1sfml_1_1state.html#a5d51450b0ec955e9d2ffde739fe441a1',1,'bomberman::sfml::state']]],
+  ['stopverticalcommand_5',['stopVerticalCommand',['../namespacebomberman_1_1sfml_1_1state.html#a0261a33535f64a5c2a857e5bed869c0b',1,'bomberman::sfml::state']]]
 ];

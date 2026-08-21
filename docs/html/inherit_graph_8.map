@@ -1,3 +1,19 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$structbomberman_1_1logic_1_1Vec2.html" title="Simple 2D vector used by the logic layer." alt="" coords="5,5,184,31"/>
+<area shape="rect" id="Node000000" href="$classbomberman_1_1logic_1_1Subject.html" title="Base class for objects that can notify observers about events." alt="" coords="5,159,201,184"/>
+<area shape="rect" id="Node000001" href="$classbomberman_1_1logic_1_1EntityModel.html" title="Base model class for every object in the logic world." alt="" coords="249,122,436,162"/>
+<area shape="poly" id="edge18_Node000000_Node000001" title=" " alt="" coords="215,155,249,151,249,156,215,160"/>
+<area shape="rect" id="Node000008" href="$classbomberman_1_1logic_1_1World.html" title="Main logic class that owns the arena and updates the game rules." alt="" coords="250,187,435,212"/>
+<area shape="poly" id="edge25_Node000000_Node000008" title=" " alt="" coords="215,182,250,186,250,191,215,187"/>
+<area shape="rect" id="Node000002" href="$classbomberman_1_1logic_1_1Bomb.html" title="Bomb model placed by characters." alt="" coords="496,5,683,31"/>
+<area shape="poly" id="edge19_Node000001_Node000002" title=" " alt="" coords="375,111,424,74,483,40,515,28,517,33,485,44,427,78,378,115"/>
+<area shape="rect" id="Node000003" href="$classbomberman_1_1logic_1_1Character.html" title="A moving player or enemy." alt="" coords="484,55,695,80"/>
+<area shape="poly" id="edge20_Node000001_Node000003" title=" " alt="" coords="407,115,483,89,527,77,528,83,485,94,408,120"/>
+<area shape="rect" id="Node000004" href="$classbomberman_1_1logic_1_1Exit.html" title="Exit model used after all enemies are defeated." alt="" coords="503,104,676,129"/>
+<area shape="poly" id="edge21_Node000001_Node000004" title=" " alt="" coords="449,128,502,123,503,128,450,134"/>
+<area shape="rect" id="Node000005" href="$classbomberman_1_1logic_1_1Explosion.html" title="Explosion model for one active explosion tile." alt="" coords="484,153,695,179"/>
+<area shape="poly" id="edge22_Node000001_Node000005" title=" " alt="" coords="450,150,484,153,484,158,450,155"/>
+<area shape="rect" id="Node000006" href="$classbomberman_1_1logic_1_1PowerUp.html" title="Pickable item that changes character stats or score." alt="" coords="486,203,693,228"/>
+<area shape="poly" id="edge23_Node000001_Node000006" title=" " alt="" coords="415,164,485,187,532,200,531,205,483,193,413,169"/>
+<area shape="rect" id="Node000007" href="$classbomberman_1_1logic_1_1Wall.html" title="Wall model used for indestructible and destructible arena blocks." alt="" coords="501,252,677,277"/>
+<area shape="poly" id="edge24_Node000001_Node000007" title=" " alt="" coords="430,167,438,172,454,189,462,207,470,223,486,238,507,249,505,254,482,243,466,226,457,209,449,192,434,176,427,171"/>
 </map>

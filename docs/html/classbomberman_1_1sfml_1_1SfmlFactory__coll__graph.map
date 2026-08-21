@@ -1,5 +1,0 @@
-<map id="bomberman::sfml::SfmlFactory" name="bomberman::sfml::SfmlFactory">
-<area shape="rect" id="Node000001" title="Concrete factory that creates logic entities and their SFML views." alt="" coords="5,93,228,119"/>
-<area shape="rect" id="Node000002" href="$classbomberman_1_1logic_1_1EntityFactory.html" title="Abstract factory used by World to create entities." alt="" coords="23,5,210,45"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="119,59,119,93,114,93,114,59"/>
-</map>

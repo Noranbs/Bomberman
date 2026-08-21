@@ -1,7 +1,7 @@
 var searchData=
 [
   ['savecurrentscore_0',['saveCurrentScore',['../classbomberman_1_1logic_1_1Score.html#adbb707f6e944630914b40869477e55ee',1,'bomberman::logic::Score']]],
-  ['score_1',['score',['../classbomberman_1_1logic_1_1Score.html#a5881706842d742bd0d53dd52d05c1882',1,'bomberman::logic::Score::Score()'],['../classbomberman_1_1logic_1_1World.html#a03b3a9ce064c518ec6fc754bae3a93d1',1,'bomberman::logic::World::score()'],['../classbomberman_1_1logic_1_1Score.html',1,'bomberman::logic::Score'],['../structbomberman_1_1logic_1_1ScoreEntry.html#a7b6b1c0590882e964eaa3f2f4197af5c',1,'bomberman::logic::ScoreEntry::score']]],
+  ['score_1',['score',['../classbomberman_1_1logic_1_1World.html#a03b3a9ce064c518ec6fc754bae3a93d1',1,'bomberman::logic::World::score()'],['../structbomberman_1_1logic_1_1ScoreEntry.html#a7b6b1c0590882e964eaa3f2f4197af5c',1,'bomberman::logic::ScoreEntry::score'],['../classbomberman_1_1logic_1_1Score.html',1,'bomberman::logic::Score'],['../classbomberman_1_1logic_1_1Score.html#a5881706842d742bd0d53dd52d05c1882',1,'bomberman::logic::Score::Score()']]],
   ['score_2ecpp_2',['Score.cpp',['../Score_8cpp.html',1,'']]],
   ['score_2eh_3',['Score.h',['../Score_8h.html',1,'']]],
   ['scoreentry_4',['ScoreEntry',['../structbomberman_1_1logic_1_1ScoreEntry.html',1,'bomberman::logic']]],
@@ -20,16 +20,18 @@ var searchData=
   ['startnewgame_17',['startNewGame',['../classbomberman_1_1logic_1_1World.html#aa39f50dcc0ffd1ea1e824cfe38766dfb',1,'bomberman::logic::World']]],
   ['startnewgameatlevel_18',['startNewGameAtLevel',['../classbomberman_1_1logic_1_1World.html#af262c922f4d7f05c78031f0b59008c99',1,'bomberman::logic::World']]],
   ['startnextlevel_19',['startNextLevel',['../classbomberman_1_1logic_1_1World.html#ac2c5bd645fd072f51a47ecda830d5fab',1,'bomberman::logic::World']]],
-  ['state_20',['state',['../classbomberman_1_1sfml_1_1state_1_1VictoryState.html#a786a9940c6011a0ca15c2c9557b4b400',1,'bomberman::sfml::state::VictoryState::State()'],['../classbomberman_1_1sfml_1_1state_1_1GameOverState.html#a786a9940c6011a0ca15c2c9557b4b400',1,'bomberman::sfml::state::GameOverState::State()'],['../classbomberman_1_1sfml_1_1state_1_1PlayingState.html#a786a9940c6011a0ca15c2c9557b4b400',1,'bomberman::sfml::state::PlayingState::State()'],['../classbomberman_1_1sfml_1_1state_1_1InstructionsState.html#a786a9940c6011a0ca15c2c9557b4b400',1,'bomberman::sfml::state::InstructionsState::State()'],['../classbomberman_1_1sfml_1_1state_1_1MenuState.html#a786a9940c6011a0ca15c2c9557b4b400',1,'bomberman::sfml::state::MenuState::State()'],['../classbomberman_1_1sfml_1_1State.html#a786a9940c6011a0ca15c2c9557b4b400',1,'bomberman::sfml::State::State()'],['../classbomberman_1_1sfml_1_1State.html',1,'bomberman::sfml::State']]],
+  ['state_20',['state',['../classbomberman_1_1sfml_1_1state_1_1PlayingState.html#a786a9940c6011a0ca15c2c9557b4b400',1,'bomberman::sfml::state::PlayingState::State()'],['../classbomberman_1_1sfml_1_1state_1_1InstructionsState.html#a786a9940c6011a0ca15c2c9557b4b400',1,'bomberman::sfml::state::InstructionsState::State()'],['../classbomberman_1_1sfml_1_1state_1_1MenuState.html#a786a9940c6011a0ca15c2c9557b4b400',1,'bomberman::sfml::state::MenuState::State()'],['../classbomberman_1_1sfml_1_1State.html#a786a9940c6011a0ca15c2c9557b4b400',1,'bomberman::sfml::State::State()'],['../classbomberman_1_1sfml_1_1state_1_1GameOverState.html#a786a9940c6011a0ca15c2c9557b4b400',1,'bomberman::sfml::state::GameOverState::State()'],['../classbomberman_1_1sfml_1_1state_1_1VictoryState.html#a786a9940c6011a0ca15c2c9557b4b400',1,'bomberman::sfml::state::VictoryState::State()'],['../classbomberman_1_1sfml_1_1State.html',1,'bomberman::sfml::State']]],
   ['stateid_21',['StateId',['../namespacebomberman_1_1sfml.html#a4b424733eb60c4aae0667bc615b94187',1,'bomberman::sfml']]],
   ['statemanager_22',['statemanager',['../classbomberman_1_1sfml_1_1StateManager.html#a6b2013c23b6198ba5bab2233776ae91c',1,'bomberman::sfml::StateManager::StateManager()'],['../classbomberman_1_1sfml_1_1StateManager.html',1,'bomberman::sfml::StateManager']]],
   ['statemanager_2ecpp_23',['StateManager.cpp',['../StateManager_8cpp.html',1,'']]],
   ['statemanager_2eh_24',['StateManager.h',['../StateManager_8h.html',1,'']]],
   ['stophorizontal_25',['StopHorizontal',['../namespacebomberman_1_1logic.html#aa84794ee70d251b083f43d240fcd50d7ad6fbc5a8f4c165ce05a8221e4be6ab7b',1,'bomberman::logic']]],
-  ['stopvertical_26',['StopVertical',['../namespacebomberman_1_1logic.html#aa84794ee70d251b083f43d240fcd50d7a3236aeb9b5a2df392a308fc1bc3fbf82',1,'bomberman::logic']]],
-  ['stopwatch_27',['stopwatch',['../classbomberman_1_1logic_1_1Stopwatch.html',1,'bomberman::logic::Stopwatch'],['../classbomberman_1_1logic_1_1Stopwatch.html#a4c69de6d507974a18e532111133f26a0',1,'bomberman::logic::Stopwatch::Stopwatch()']]],
-  ['stopwatch_2ecpp_28',['Stopwatch.cpp',['../Stopwatch_8cpp.html',1,'']]],
-  ['stopwatch_2eh_29',['Stopwatch.h',['../Stopwatch_8h.html',1,'']]],
-  ['subject_30',['Subject',['../classbomberman_1_1logic_1_1Subject.html',1,'bomberman::logic']]],
-  ['synctransform_31',['syncTransform',['../classbomberman_1_1sfml_1_1EntityView.html#a4a2757d3343521a50283aa3afe300d6f',1,'bomberman::sfml::EntityView']]]
+  ['stophorizontalcommand_26',['stophorizontalcommand',['../classbomberman_1_1logic_1_1StopHorizontalCommand.html',1,'bomberman::logic::StopHorizontalCommand'],['../namespacebomberman_1_1sfml_1_1state.html#a5d51450b0ec955e9d2ffde739fe441a1',1,'bomberman::sfml::state::stopHorizontalCommand']]],
+  ['stopvertical_27',['StopVertical',['../namespacebomberman_1_1logic.html#aa84794ee70d251b083f43d240fcd50d7a3236aeb9b5a2df392a308fc1bc3fbf82',1,'bomberman::logic']]],
+  ['stopverticalcommand_28',['stopverticalcommand',['../classbomberman_1_1logic_1_1StopVerticalCommand.html',1,'bomberman::logic::StopVerticalCommand'],['../namespacebomberman_1_1sfml_1_1state.html#a0261a33535f64a5c2a857e5bed869c0b',1,'bomberman::sfml::state::stopVerticalCommand']]],
+  ['stopwatch_29',['stopwatch',['../classbomberman_1_1logic_1_1Stopwatch.html',1,'bomberman::logic::Stopwatch'],['../classbomberman_1_1logic_1_1Stopwatch.html#a4c69de6d507974a18e532111133f26a0',1,'bomberman::logic::Stopwatch::Stopwatch()']]],
+  ['stopwatch_2ecpp_30',['Stopwatch.cpp',['../Stopwatch_8cpp.html',1,'']]],
+  ['stopwatch_2eh_31',['Stopwatch.h',['../Stopwatch_8h.html',1,'']]],
+  ['subject_32',['Subject',['../classbomberman_1_1logic_1_1Subject.html',1,'bomberman::logic']]],
+  ['synctransform_33',['syncTransform',['../classbomberman_1_1sfml_1_1EntityView.html#a4a2757d3343521a50283aa3afe300d6f',1,'bomberman::sfml::EntityView']]]
 ];

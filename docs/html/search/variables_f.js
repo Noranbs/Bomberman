@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['x_0',['x',['../structbomberman_1_1logic_1_1Vec2.html#afb507fa51208749321df707cfd3a6a64',1,'bomberman::logic::Vec2']]]
+  ['window_0',['window',['../classbomberman_1_1sfml_1_1EntityView.html#a9ead6fe8524df0b9f1ec2bbc69b7f336',1,'bomberman::sfml::EntityView']]]
 ];

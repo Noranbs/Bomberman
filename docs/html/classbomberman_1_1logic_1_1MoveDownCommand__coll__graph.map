@@ -1,0 +1,5 @@
+<map id="bomberman::logic::MoveDownCommand" name="bomberman::logic::MoveDownCommand">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,93,227,133"/>
+<area shape="rect" id="Node000002" href="$classbomberman_1_1logic_1_1PlayerCommand.html" title="Command interface for player actions." alt="" coords="21,5,211,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="119,59,119,93,113,93,113,59"/>
+</map>

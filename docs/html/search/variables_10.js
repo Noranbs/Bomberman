@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['y_0',['y',['../structbomberman_1_1logic_1_1Vec2.html#aeee4834d40b34dec9a7b7f31c8bb4b84',1,'bomberman::logic::Vec2']]]
+  ['x_0',['x',['../structbomberman_1_1logic_1_1Vec2.html#afb507fa51208749321df707cfd3a6a64',1,'bomberman::logic::Vec2']]]
 ];

@@ -1,0 +1,19 @@
+<map id="bomberman::logic::PlayerCommand" name="bomberman::logic::PlayerCommand">
+<area shape="rect" id="Node000001" title="Command interface for player actions." alt="" coords="5,229,195,269"/>
+<area shape="rect" id="Node000002" href="$classbomberman_1_1logic_1_1KickBombCommand.html" title=" " alt="" coords="257,5,472,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="114,215,135,178,163,135,199,92,241,55,263,43,266,48,244,60,203,95,167,138,139,181,119,218"/>
+<area shape="rect" id="Node000003" href="$classbomberman_1_1logic_1_1MoveDownCommand.html" title=" " alt="" coords="254,69,475,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="125,217,175,167,207,141,241,119,268,107,270,112,244,124,210,145,179,171,129,221"/>
+<area shape="rect" id="Node000004" href="$classbomberman_1_1logic_1_1MoveLeftCommand.html" title=" " alt="" coords="261,133,469,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="152,221,242,183,280,171,281,176,244,188,154,226"/>
+<area shape="rect" id="Node000005" href="$classbomberman_1_1logic_1_1MoveRightCommand.html" title=" " alt="" coords="255,197,474,237"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="208,234,255,228,255,233,209,239"/>
+<area shape="rect" id="Node000006" href="$classbomberman_1_1logic_1_1MoveUpCommand.html" title=" " alt="" coords="263,261,466,301"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="209,260,264,266,263,272,208,265"/>
+<area shape="rect" id="Node000007" href="$classbomberman_1_1logic_1_1PlaceBombCommand.html" title=" " alt="" coords="254,325,475,365"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="154,273,244,311,281,323,280,328,242,316,152,278"/>
+<area shape="rect" id="Node000008" href="$classbomberman_1_1logic_1_1StopHorizontalCommand.html" title=" " alt="" coords="243,389,487,429"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="129,278,179,328,210,353,244,375,270,387,268,392,241,380,207,358,175,332,125,281"/>
+<area shape="rect" id="Node000009" href="$classbomberman_1_1logic_1_1StopVerticalCommand.html" title=" " alt="" coords="251,453,478,493"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="119,281,139,318,167,361,203,403,244,439,266,451,263,456,241,444,199,407,163,364,135,321,114,283"/>
+</map>

@@ -1,5 +1,0 @@
-<map id="bomberman::sfml::detail::PlayingState" name="bomberman::sfml::detail::PlayingState">
-<area shape="rect" id="Node000001" title="Active gameplay state that forwards input to the logic world." alt="" coords="5,79,188,119"/>
-<area shape="rect" id="Node000002" href="$classbomberman_1_1sfml_1_1State.html" title="Base class for one game screen." alt="" coords="7,5,187,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="99,44,99,79,94,79,94,44"/>
-</map>
