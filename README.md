@@ -6,8 +6,6 @@ Advanced Programming project: a small Bomberman style game written in C++20 with
 
 - Name: TODO
 - Student number: TODO
-- GitHub repository: TODO
-
 ## Build and Run
 
 The project uses CMake. The game logic is built as a separate library, and the SFML application links against it.
@@ -41,6 +39,12 @@ The generated documentation is written to `build/doc/html/index.html`.
 - Kick bomb after collecting Punch Glove: K
 - Pause/resume: Enter
 - Return to menu while paused: Esc
+
+## Game
+
+The game starts with a menu. The menu shows the top five scores and has a Play button. There is also an instructions screen with controls and power-ups.
+
+The player starts in the top left corner. The three enemies start in the other corners. The goal is to defeat all enemies. After all enemies are defeated, an exit appears. The player can go to the exit immediately or first collect more power-ups.
 
 ## Documentation
 
